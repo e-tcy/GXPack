@@ -28,33 +28,34 @@ setlocal enableDelayedExpansion
 title GX_ Pack - Pre-release (0.9.00)
 md %temp%\gx-pack-downloads
 set DownloadDirectory=%temp%\gx-pack-downloads
-set "GXPackVersion=v0.9.00 (Pre-release)"
+set "GXPackVersion=v0.9.1 (Pre-release)"
 
 REM CPU Architecture checker (x86 isn't supported)
 reg Query "HKLM\Hardware\Description\System\CentralProcessor\0" | find /i "x86" > NUL && set OSArchitecture=x86 || set OSArchitecture=x64
 if "%OSArchitecture%"=="x86" echo    Warning. Your OS architecture is unsupported by most of the software included in this program pack. & pause & exit
 
 REM Windows version checker
-FOR /F "tokens=2* skip=2" %%a in ('reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v "CurrentBuildNumber"') do set Build=%%b
+for /f "tokens=4-7 delims=[.] " %%i in ('ver') do (if %%i==Version (set kernelver=%%j.%%k) else (set kernelver=%%i.%%j))
+for /F "tokens=2* skip=2" %%a in ('reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v "CurrentBuildNumber"') do set Build=%%b
 if /I "%Build%" GEQ "21996" (
     set OperatingSystem=11
     goto start11
-) else (
-    set OperatingSystem=10
-    goto start108
 )
-if "%v%" == "6.3" (
+if "%kernelver%" == "6.3" (
     set "OperatingSystem=8.1" 
     goto start108
 )
-if "%v%" == "6.2" (
+if "%kernelver%" == "6.2" (
     set "OperatingSystem=8" 
     goto start108
 )
-if "%v%" == "6.1" (
+if "%kernelver%" == "6.1" (
     set "OperatingSystem=7" & echo Most of the programs aren't supported by your OS. Also, for the script to work, please, install Windows Management Framework 3 to get Powershell 3. You've been warned. 
     pause 
     goto start7
+) else (
+    set OperatingSystem=10
+    goto start108
 )
 
 :start7
@@ -282,7 +283,7 @@ if '%choice%'=='6' (
 )
 if '%choice%'=='7' (
     echo Downloading...
-    powershell -Command "Invoke-WebRequest https://pcmdistributestorage.blob.core.windows.net/mvp/500000/25868/MSPCManagerSetup.exe?sv=2021-10-04&st=2022-12-23T09%3A44%3A31Z&se=2023-06-24T09%3A44%3A00Z&r=b&sp=r&sig=PW0SDnPoP5p68oeRrzahyxnZWzsjASoK9oU3VT%2FSPAk%3D -OutFile %DownloadDirectory%\pcmanager.exe"
+    powershell -Command "Invoke-WebRequest https://aka.ms/PCManager10000 -OutFile %DownloadDirectory%\pcmanager.exe"
     echo Installing...
     call %DownloadDirectory%\pcmanager.exe /S
     echo Done.
@@ -987,8 +988,8 @@ echo.
 echo.
 echo    Select the runtime to install.
 echo.
-echo    1. Java 20 (JRE) (Adoptium Temurin)
-echo    2. Java 20 (JDK) (Adoptium Temurin)
+echo    1. Java 8 (JRE)
+echo    2. Java 20 (JDK)
 echo    3. .NET 7 (SDK)
 echo    4. .NET 6 (SDK)
 echo    5. Edge WebView2
@@ -1005,9 +1006,9 @@ set choice=
 set /p choice=...Enter your choice:  
 if '%choice%'=='1' (
     echo Downloading...
-    powershell -Command "Invoke-WebRequest https://github.com/adoptium/temurin20-binaries/releases/download/jdk-20.0.1%2B9/OpenJDK20U-jre_x64_windows_hotspot_20.0.1_9.msi -OutFile %DownloadDirectory%\jre20.msi"
+    powershell -Command "Invoke-WebRequest https://javadl.oracle.com/webapps/download/AutoDL?BundleId=248242_ce59cff5c23f4e2eaf4e778a117d4c5b -OutFile %DownloadDirectory%\jre8.exe"
     echo Installing...
-    call %DownloadDirectory%\jre20.msi /quiet /norestart
+    call %DownloadDirectory%\jre8.exe
     echo Done.
     pause
     cd ..
@@ -1015,7 +1016,7 @@ if '%choice%'=='1' (
 )
 if '%choice%'=='2' (
     echo Downloading...
-    powershell -Command "Invoke-WebRequest https://github.com/adoptium/temurin20-binaries/releases/download/jdk-20.0.1%2B9/OpenJDK20U-jdk_x64_windows_hotspot_20.0.1_9.msi -OutFile %DownloadDirectory%\jdk20.msi"
+    powershell -Command "Invoke-WebRequest https://download.oracle.com/java/20/latest/jdk-20_windows-x64_bin.msi -OutFile %DownloadDirectory%\jdk20.msi"
     echo Installing...
     call %DownloadDirectory%\jdk20.msi /quiet /norestart
     echo Done.
