@@ -7,5 +7,5 @@ I have made an entire discord server to just talk to everybody about it and maki
 Mainly, because the Microsoft Community discord server moderators didn't allow me to speak about it for stupid reasons. <br />
 Anyways, the server was made and the project lives on. <br />
 Join by this link down below: <br />
-*https://discord.gg/UTtbfgzyGj* <br />
+*https://discord.gg/3e46tHdHSu* <br />
 Please, test the pack and tell me the issues through the github page. <br />
