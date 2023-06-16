@@ -9,10 +9,10 @@
     <a href="https://discord.gg/bBGQZvd"><img src="https://img.shields.io/discord/1098529288162136066?color=green&label=talk%20or%20report%20bugs&logo=discord&logoColor=violet" alt="Discord Server"/></a>
     <br/>
     <img src="https://img.shields.io/github/downloads/GalexGX/GXPack/total?color=blueviolet&label=Times%20the%20pack%20has%20been%20downloaded%3A&logo=Github" alt="Github Downloads"/>
-    <img src="https://img.shields.io/github/last-commit/GalexGX/GXPack?style=plastic" alt="Github last commit"/>
+    <img src="https://img.shields.io/github/last-commit/GalexGX/GXPack?style=flat" alt="Github last commit"/>
     <br/>
-    <img src="https://img.shields.io/github/size/GalexGX/GXPack/GX_%20Pack.bat?label=File%20size&style=plastic" alt="The size of the code in bytes"/>
-    <img src="https://img.shields.io/tokei/lines/Github/GalexGX/GXPack?label=Total%20lines%20of%20code&style=plastic" alt="The amount of lines in the code"/>
+    <img src="https://img.shields.io/github/size/GalexGX/GXPack/GX_%20Pack.bat?label=File%20size&style=flat" alt="The size of the code in bytes"/>
+    <img src="https://img.shields.io/tokei/lines/Github/GalexGX/GXPack?label=Total%20lines%20of%20code&style=flat" alt="The amount of lines in the code"/>
     <img src="https://img.shields.io/github/languages/top/GalexGX/GXPack?color=darkblue&label=Written%20on%20BATCH&logo=Windows&logoColor=lightblue" alt="The script was written in"/>
 </div>
 
