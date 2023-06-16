@@ -16,19 +16,21 @@
     <img src="https://img.shields.io/github/languages/top/GalexGX/GXPack?color=darkblue&label=Written%20on%20BATCH&logo=Windows&logoColor=lightblue" alt="The script was written in"/>
 </div>
 
+<br/>
+
 <h1 align="center">What is.. the GX_ Pack?</h1>
-<p align="center">
-GX_ Pack - is a simple command-line tool to download and install programs that i favor and you suggest, and is a project i've been working on for a good while for fun.
-It works pretty simply, by downloading the installer and silently launching it.
-<br />
-We have a discord server if you just want to talk or if you need to discuss anything about the pack, like suggestions, bug reports and more. I will be ready to receive your suggestions, so don't be shy to say them!
-You can happily join it by the link down here: <br/>
-https://discord.gg/3e46tHdHSu
+<h4> GX_ Pack - is a simple command-line tool to download and install programs that i favor and you suggest, and is a project i've been working on for a good while for fun.
+It works pretty simply, by downloading the installer and silently launching it.</h5>
+<h4> We have a discord server if you just want to talk or if you need to discuss anything about the pack, like suggestions, bug reports and more. I will be ready to receive your suggestions, so don't be shy to say them!
+You can happily join it by the link down here: <br/> </h4>
+<h3> https://discord.gg/3e46tHdHSu </h3>
     
 <h1 align="center">Usage</h1>
-<p align="center">
-It might be obvious, just launch it and use it, but there is some things you need to consider.
-Upon launch, it will download the following: <br/>
-wget.exe (An advanced tool to download files way more quickly than Powershell)
-7za.exe (7z extra to extract files from zip archives)
-nsudo.exe (A tool to launch files without admin permissions if an app doesn't need them)
+<h4> It might be obvious, just launch it and use it, but there is some things you need to consider. <br/>
+Don't be scared at the beginning, because it will use a really ancient module by the name of BITSADMIN, that was introduced in Vista.
+It will switch to WGET as soon as it downloads it. <br/>
+After that, you can use the code how you'd like. <br/>
+Upon launch, it will download the following: <br/> </h4>
+<h4> wget.exe (An advanced tool to download files way more quickly than Powershell) </h4>
+<h4> 7za.exe (7z extra to extract files from zip archives) </h4>
+<h4> nsudo.exe (A tool to launch files without admin permissions if an app doesn't need them) </h4>
