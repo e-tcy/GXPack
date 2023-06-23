@@ -1136,10 +1136,7 @@ goto virtualization
     del prismlauncher.exe
     goto game
 :sklauncher
-    wget.exe --no-check-certificate "https://skmedix.pl/data/SKlauncher%203.1.exe" -O "sklauncher.exe"
-    sklauncher.exe
-    pause
-    del sklauncher.exe
+    wget.exe --no-check-certificate "https://skmedix.pl/data/SKlauncher%203.1.exe" -O "%Desktop%\sklauncher.exe"
     goto game
 :osu
     wget.exe --no-check-certificate "https://cdn.discordapp.com/attachments/769802700740362263/1110264771393106011/osuinstall.exe" -O osu.exe
