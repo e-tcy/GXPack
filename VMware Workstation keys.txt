@@ -17,7 +17,7 @@
 ----------------------------------------------------------------------
 		Auto-select versions
  If you used auto-select via the OS you are using, listen:
- W10/11 is 17, W8.1 is 16, W8 is 14 and W7 is 15.
+ W10/11 is 17, W8.1 is 16, W8/W7 RTM is 14 and W7 SP1 is 15.
  VMware 12 is just here for legacy CPUs that we're made before 2010.
 
 ----------------------------------------------------------------------
