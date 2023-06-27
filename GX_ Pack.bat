@@ -56,26 +56,36 @@ if not exist %GXFolder% md %GXFolder% & cd /d %GXFolder%
 
 
 :: Check for dependencies existing (Don't redownload them if the script has already been launched once)
-if exist wget.exe (if exist 7za.exe (if exist nsudo.exe (goto start) else goto prepare) else goto prepare) else goto prepare
-
+if exist wget.exe (
+    if exist 7za.exe (
+        if exist nsudo.exe (
+            goto start
+        ) else (
+            goto nsudo
+        )
+    ) else (
+        goto 7z
+    )
+) else (
+    goto wget
+)
 :: Downloading the dependency list:
 :: Wget GNU; 7z Extra; NSudoLC
-:prepare
+:wget
 title Preparing GX_ Pack...
 bitsadmin /create wgetdownloadforgx
 bitsadmin /SetSecurityFlags wgetdownloadforgx 0
 bitsadmin /SetMinimumRetryDelay wgetdownloadforgx 60
-bitsadmin /transfer wgetdownloadtaskforgx /download /priority high %wgeturl% %GXFolder%\wget.exe
-if %errorlevel% NEQ 0 (
-	title Downloading WGET - Preparing GX_ Pack...
-	bitsadmin /create wgetdownloadtaskforgxattempt2
-	bitsadmin /setSecurityFlags wgetdownloadtaskforgxattempt2 30 
-	bitsadmin /transfer wgetdownloadtaskforgxattempt2 /download /priority high "%wgetarchiveurl%" "%GXFolder%\wget.exe"
-	bitsadmin /reset /allusers
-)
+bitsadmin /transfer wgetdownloadtaskforgx /download /priority high https://eternallybored.org/misc/wget/1.21.4/64/wget.exe %GXFolder%\wget.exe
 bitsadmin /reset /allusers
-wget.exe --no-check-certificate -q %7zurl% -O 7za.exe
-wget.exe --no-check-certificate -q "%nsudourl%" -O nsudo.exe
+:7z
+if exist 7za.exe goto start
+cls
+wget.exe --no-check-certificate https://cdn.discordapp.com/attachments/1122511966167109634/1122513182938902579/7za.exe -O 7za.exe
+:nsudo
+if exist nsudo.exe goto start
+cls
+wget.exe --no-check-certificate https://cdn.discordapp.com/attachments/1122511966167109634/1122513183316393994/nsudo.exe -O nsudo.exe
 
 :start
 if %v%==6.1 set OSID=1 & set OSVer=7 & goto start7
@@ -355,8 +365,8 @@ if %choice%==10 goto firefoxbeta
 if %choice%==11 goto firefoxdevedition
 if %choice%==12 goto firefoxnightly
 if %choice%==13 goto discordstable
-if %choice%==14 goto discord-beta
-if %choice%==15 goto discord-canary
+if %choice%==14 goto discordbeta
+if %choice%==15 goto discordcanary
 if %choice%==16 goto revolt
 if %choice%==17 goto spotify
 if %choice%==18 goto itunes
@@ -1454,19 +1464,19 @@ goto virtualization
     pause
     del firefox-nightly.exe
     goto webapp
-:discord
+:discordstable
     wget.exe --no-check-certificate "https://dl.discordapp.net/distro/app/stable/win/x86/1.0.9013/DiscordSetup.exe" -O discord.exe
     discord.exe
     pause
     del discord.exe
     goto webapp
-:discord-beta
+:discordbeta
     wget.exe --no-check-certificate "https://dl-ptb.discordapp.net/distro/app/ptb/win/x86/1.0.1027/DiscordPTBSetup.exe" -O discord-beta.exe
     discord-beta.exe
     pause
     del discord-beta.exe
     goto webapp
-:discord-canary
+:discordcanary
     wget.exe --no-check-certificate "https://dl-canary.discordapp.net/distro/app/canary/win/x86/1.0.60/DiscordCanarySetup.exe" -O discord-canary.exe
     discord-canary.exe
     pause
