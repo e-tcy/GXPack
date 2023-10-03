@@ -1,10 +1,8 @@
 ----------------------------------------------------------------------
-
  Heya, naughty person!
  Want some free VMware Workstation serial keys?
  We we're actually going to add them to the pack, but Windows Defender
  would mark us as a Trojan/Wacatac.H!ml, and we don't want that, so..
-
 ----------------------------------------------------------------------
  		VMware Workstation serial keys:
  VMware 17:                        VMware 14:
@@ -13,16 +11,13 @@
  YA7RA-F6Y46-H889Z-LZMXZ-WF8UA     AZ10A-DXWD5-H89UZ-QMNG9-M2RY8
  VMware 15:
  FU512-2DG1H-M85QZ-U7Z5T-PY8ZD
- 
 ----------------------------------------------------------------------
 		Auto-select versions
  If you used auto-select via the OS you are using, listen:
  W10/11 is 17, W8.1 is 16, W8/W7 RTM is 14 and W7 SP1 is 15.
  VMware 12 is just here for legacy CPUs that we're made before 2010.
-
 ----------------------------------------------------------------------
-
-Document written by Galex#8810
-Keys were given by EAZY BLACK#6571
+Document written by .galex_
+Keys were given by eazyblack
 Our Github Repo - https://github.com/GalexGX/GXPack
 Our Discord Server - https://discord.gg/3e46tHdHSu
