@@ -39,9 +39,9 @@ set gxdir=%temp%\GXTemp
 set desktop=%userprofile%\Desktop
 set packversion=v1.3d
 set Build=Your build number: %buildnumber%
-if exist wget.exe xcopy /Y /Q wget.exe "%gxdir%"
-if exist %gxdir% cd /d %gxdir%
-md %gxdir%
+if exist wget.exe xcopy /S /Q /Y /F wget.exe "%gxdir%"
+if exist %gxdir% cd /d %gxdir% & goto dependencies
+>nul md %gxdir%
 cd /d %gxdir%
 
 :dependencies
@@ -78,7 +78,6 @@ if %v%==6.2 set OSID=2 & set winver=8
 if %v%==6.3 set OSID=3 & set winver=8.1
 if %v%==10.0 set OSID=4 & set winver=10
 if /I %buildnumber% GEQ 21996 set OSID=5 & set winver=11
-
 
 :: Start icon parameters:
 :: /w7 = Windows 7 start icon
@@ -261,75 +260,78 @@ echo.
 echo    -------------------- Choose a software application! --------------------
 echo.
 echo    ---------------------------- Compression -------------------------------
-echo                1. 7-zip                       2. Caesium
+echo                1. 7-zip                       3. NanaZip
+echo                2. Caesium 
+echo    ----------------------------- Utilities ---------------------------------
+echo                4. CPU-Z                       8. Foxit Reader
+echo                5. GPU-Z                       9. TCPOptimizer
+echo                6. LightShot                   10. ShareX
+echo                7. CrystalDiskInfo             11. HWinfo
+echo    ---------------------------- Media players -----------------------------
+echo                12. Kodi                       15. K-Lite Codec Pack
+echo                13. VLC                        16. mpv
+echo                14. Rise Media Player
+echo    ---------------------------- Optimization ------------------------------
+echo                17. Microsoft PC Manager       19. Optimizer
+echo                18. Mem Reduct                 20. WinMemoryCleaner
 echo    ---------------------------- System Tools ------------------------------
-echo                3. Process Hacker 2            20. Mz CPU Accelerator
-echo                4. VLC                         21. Winlaunch
-echo                5. K-Lite Codec Pack           22. Fences (paid)
-echo                6. LibreOffice                 23. Groupy (paid)
-echo                7. Unlocker                    24. Mem Reduct
-echo                8. Microsoft PC Manager        25. Optimizer
-echo                9. Google Picasa 3             26. BCUninstaller
-echo                10. HWinfo                     27. UltraISO
-echo                11. CrystalDiskInfo            28. ShareX
-echo                12. EasyBCD                    29. Everything Search
-echo                13. Flux                       30. AltDrag
-echo                14. MiniBin                    31. VB-Audio Cable
-echo                15. Unchecky                   32. WingetUI
-echo                16. WizTree                    33. WinMemoryCleaner
-echo                17. WizFile                    34. mpv
-echo                18. Ueli                       35. AnyDesk
-echo    ------------------------------ Utilities --------------------------------
-echo                36. CPU-Z                      40. Foxit Reader
-echo                37. GPU-Z                      41. TCPOptimizer
-echo                38. Kodi                       42. LightShot
-echo                39. NanaZip
+echo                21. Process Hacker 2           33. Fences (paid)
+echo                22. Winlaunch                  34. Groupy (paid)
+echo                23. LibreOffice                35. UltraISO  
+echo                24. Mz CPU Accelerator         36. BCUninstaller
+echo                25. Google Picasa 3            37. Everything Search
+echo                26. EasyBCD                    38. AltDrag
+echo                27. Flux                       39. VB-Audio Cable
+echo                28. MiniBin                    40. WingetUI 
+echo                29. Unchecky                   41. Ueli                
+echo                30. WizFile                    42. AnyDesk                     
+echo                31. WizTree                    
+echo                32. Unlocker
 echo    ------------------------------ 0. Go back --------------------------------                    
-echo.
-echo.
+echo. & echo.
 set /p choice=Enter your desired choice: 
 if %choice%==1 goto 7z
 if %choice%==2 goto caesium
-if %choice%==3 goto ph
-if %choice%==4 goto vlc
-if %choice%==5 goto klitecodecpack
-if %choice%==6 goto libreoffice
-if %choice%==7 goto unlocker
-if %choice%==8 goto pcmanager
-if %choice%==9 goto picasa
-if %choice%==10 goto hwi
-if %choice%==11 goto cdi
-if %choice%==12 goto easybcd
-if %choice%==13 goto flux
-if %choice%==14 goto minibin
-if %choice%==15 goto unchecky
-if %choice%==16 goto wiztree
-if %choice%==17 goto wizfile
-if %choice%==18 goto ueli
-if %choice%==19 goto nanazip
-if %choice%==20 goto mzcpu
-if %choice%==21 goto winlaunch
-if %choice%==22 goto fences
-if %choice%==23 goto groupy
-if %choice%==24 goto memreduct
-if %choice%==25 goto optimizer
-if %choice%==26 goto bcu
-if %choice%==27 goto ultraiso
-if %choice%==28 goto sharex
-if %choice%==29 goto everything
-if %choice%==30 goto altdrag
-if %choice%==31 goto cable
-if %choice%==32 goto wingetui
-if %choice%==33 goto wmc
-if %choice%==34 goto mpv
-if %choice%==35 goto anydesk
-if %choice%==36 goto cpuz
-if %choice%==37 goto gpuz
-if %choice%==38 goto kodi
-if %choice%==39 goto nanazip
-if %choice%==40 goto foxit
-if %choice%==41 goto tcpoptimizer
-if %choice%==42 goto lightshot  
+if %choice%==3 goto nanazip
+if %choice%==4 goto cpuz
+if %choice%==5 goto gpuz
+if %choice%==6 goto lightshot
+if %choice%==7 goto cdi
+if %choice%==8 goto foxit
+if %choice%==9 goto tcpoptimizer
+if %choice%==10 goto sharex
+if %choice%==11 goto hwi
+if %choice%==12 goto kodi
+if %choice%==13 goto vlc
+if %choice%==14 goto risemp
+if %choice%==15 goto klitecodecpack
+if %choice%==16 goto mpv
+if %choice%==17 goto pcmanager
+if %choice%==18 goto memreduct
+if %choice%==19 goto optimizer
+if %choice%==20 goto winmemorycleaner
+if %choice%==21 goto processhacker
+if %choice%==22 goto winlaunch
+if %choice%==23 goto libreoffice
+if %choice%==24 goto mzcpu
+if %choice%==25 goto picasa
+if %choice%==26 goto easybcd
+if %choice%==27 goto flux
+if %choice%==28 goto minibin
+if %choice%==29 goto unchecky
+if %choice%==30 goto wizfile
+if %choice%==31 goto wiztree
+if %choice%==32 goto unlocker
+if %choice%==33 goto fences
+if %choice%==34 goto groupy
+if %choice%==35 goto ultraiso
+if %choice%==36 goto bcu
+if %choice%==37 goto everything
+if %choice%==38 goto altdrag
+if %choice%==39 goto cable
+if %choice%==40 goto wingetui
+if %choice%==41 goto ueli
+if %choice%==42 goto anydesk
 if %choice%==0 goto start
 if %errorlevel%==1 echo choice is not a valid choice. Please try again. & pause & goto software
 
@@ -873,9 +875,8 @@ pause
 del net31run.exe
 goto runtime
 :vmware
-setlocal enabledelayedexpansion
-set url="https://download3.vmware.com/software/WKST-1700-WIN/VMware-workstation-full-17.0.0-20800274.exe"
-if %vmware%=="auto" 
+if %vmware%==auto (
+    set url="https://download3.vmware.com/software/WKST-1700-WIN/VMware-workstation-full-17.0.0-20800274.exe"
     if %OSID%==1 (
         set "url=https://download3.vmware.com/software/wkst/file/VMware-workstation-full-15.5.7-17171714.exe"
         if %ServicePack%==0 set "url=https://download3.vmware.com/software/wkst/file/VMware-workstation-full-14.1.8-14921873.exe"
@@ -883,6 +884,7 @@ if %vmware%=="auto"
     if %OSID%==2 set "url=https://download3.vmware.com/software/wkst/file/VMware-workstation-full-14.1.8-14921873.exe"
     if %OSID%==3 set "url=https://download3.vmware.com/software/wkst/file/VMware-workstation-full-16.2.2-19200509.exe"
 )
+set url="https://download3.vmware.com/software/WKST-1700-WIN/VMware-workstation-full-17.0.0-20800274.exe"
 if %vmware%==1 set "url=https://download3.vmware.com/software/wkst/file/VMware-workstation-full-16.2.2-19200509.exe"
 if %vmware%==2 set "url=https://download3.vmware.com/software/wkst/file/VMware-workstation-full-15.5.7-17171714.exe"
 if %vmware%==3 set "url=https://download3.vmware.com/software/wkst/file/VMware-workstation-full-14.1.8-14921873.exe"
@@ -1627,17 +1629,23 @@ wget.exe --no-check-certificate "https://www.7-zip.org/a/7z2201-x64.msi" -O 7z.m
 pause
 del 7z.msi
 goto software
-:ph
-wget.exe --no-check-certificate "https://deac-fra.dl.sourceforge.net/project/processhacker/processhacker2/processhacker-2.39-setup.exe" -O ph.exe
-ph.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
+:processhacker
+wget.exe --no-check-certificate "https://deac-fra.dl.sourceforge.net/project/processhacker/processhacker2/processhacker-2.39-setup.exe" -O processhacker.exe
+processhacker.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
 pause
-del ph.exe
+del processhacker.exe
 goto software
 :vlc
 wget.exe --no-check-certificate "https://mirrors.neterra.net/vlc/vlc/3.0.18/win64/vlc-3.0.18-win64.msi" -O vlc.msi
 vlc.msi /quiet
 pause
 del vlc.msi
+goto software
+:risemp
+wget.exe --no-check-certificate "https://github.com/Rise-Software/Rise-Media-Player/releases/download/v0.0.300.0/RiseSoftware.RiseMP.V0.0.300.0.msixbundle" -O risemp.appx
+risemp.appx
+pause
+del risemp.appx
 goto software
 :klitecodecpack
 wget.exe --no-check-certificate "https://files2.codecguide.com/K-Lite_Codec_Pack_1785_Full.exe" -O klitecodecpack.exe
@@ -1670,7 +1678,7 @@ pause
 del lightshot.exe
 goto software
 :qbit
-wget.exe --no-check-certificate "https://www.fosshub.com/qBittorrent.html?dwl=qbittorrent_4.5.5_x64_setup.exe#" -O qbit.exe
+wget.exe --no-check-certificate "https://www.fosshub.com/qBittorrent-old.html?dwl=qbittorrent_4.5.5_x64_setup.exe" -O qbit.exe
 qbit.exe /S
 pause
 del qbit.exe
@@ -1836,7 +1844,7 @@ wingetui.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
 pause
 del wingetui.exe
 goto software
-:wmc
+:winmemorycleaner
 wget.exe --no-check-certificate "https://github.com/IgorMundstein/WinMemoryCleaner/releases/download/2.5/WinMemoryCleaner.exe" -O %appdata%\wmc.exe
 wmc.exe
 goto software
