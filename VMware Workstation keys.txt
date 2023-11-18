@@ -3,12 +3,11 @@
             Want some free VMware Workstation serial keys?
 ----------------------------------------------------------------------
  		        VMware Workstation serial keys:
- VMware 17:                        VMware 14:
- MC60H-DWHD5-H80U9-6V85M-8280D	   VC7JR-A0Z97-08EGZ-M4YNV-XVHD0
- VMware 16:                        VMware 12:
- YA7RA-F6Y46-H889Z-LZMXZ-WF8UA     AZ10A-DXWD5-H89UZ-QMNG9-M2RY8
- VMware 15:
- FU512-2DG1H-M85QZ-U7Z5T-PY8ZD
+            VMware 17: MC60H-DWHD5-H80U9-6V85M-8280D
+            VMware 16: YA7RA-F6Y46-H889Z-LZMXZ-WF8UA
+            VMware 15: FU512-2DG1H-M85QZ-U7Z5T-PY8ZD
+            VMware 14: VC7JR-A0Z97-08EGZ-M4YNV-XVHD0
+            VMware 12: AZ10A-DXWD5-H89UZ-QMNG9-M2RY8
 ----------------------------------------------------------------------
                        Auto-select versions
  If you used auto-select via the OS you are using, listen:
