@@ -15,7 +15,5 @@
  W10/11 is 17, W8.1 is 16, W8/W7 RTM is 14 and W7 SP1 is 15.
  VMware 12 is just here for legacy CPUs that were made before 2010.
 ----------------------------------------------------------------------
-Document written by .galex_
-Keys were given by eazyblack
-Our Github Repo - https://github.com/GalexGX/GXPack
-Our Discord Server - https://discord.gg/3e46tHdHSu
+                    Document written by .galex_
+                    Keys were given by eazyblack
