@@ -13,7 +13,7 @@
     <img src="https://img.shields.io/github/last-commit/GalexGX/GXPack?style=flatlogo=Github" alt="last commit"/>
     <br/>
     <img src="https://img.shields.io/github/size/GalexGX/GXPack/GX_%20Pack.bat?label=size&style=flat" alt="size"/>
-    <img src="https://img.shields.io/tokei/lines/Github/GalexGX/GXPack?label=lines%20of%20code&style=flat" alt="lines of code"/>
+    <img src="https://img.shields.io/tokei/lines/github/galexgx/gxpack?style=flat&label=lines%20of%20code" alt="lines of code"/>
     <img src="https://img.shields.io/github/languages/top/GalexGX/GXPack?color=darkblue&label=Written%20on%20BATCH&logo=Windows&logoColor=lightblue" alt="The script was written in"/>
 </div>
 
