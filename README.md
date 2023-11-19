@@ -16,7 +16,7 @@
   <br/>
   <img src="https://img.shields.io/github/size/GalexGX/GXPack/GXPack.bat?label=size&style=flat" alt="size"/>
   <a href="https://github.com/galexgx/gxpack">
-    <img src="https://img.shields.io/tokei/lines/github/galexgx/gxpack/GXPack.bat?style=flat&label=lines%20of%20code" alt="lines of code">
+    <img src="https://img.shields.io/tokei/lines/github/galexgx/gxpack?style=flat&label=lines%20of%20code" alt="lines of code">
   </a>
   <img src="https://img.shields.io/github/languages/top/GalexGX/GXPack?color=darkblue&label=Written%20on%20BATCH&logo=Windows&logoColor=lightblue" alt="The script was written in"/>
 </p>
