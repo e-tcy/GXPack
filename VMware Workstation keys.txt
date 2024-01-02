@@ -1,8 +1,8 @@
 ----------------------------------------------------------------------
-                      Heya, naughty person!
-            Want some free VMware Workstation serial keys?
+                     Heya, naughty person!
+          Want some free VMware Workstation serial keys?
 ----------------------------------------------------------------------
- 		            VMware Workstation serial keys:
+                 VMware Workstation serial keys:
             VMware 17: MC60H-DWHD5-H80U9-6V85M-8280D
             VMware 16: YA7RA-F6Y46-H889Z-LZMXZ-WF8UA
             VMware 15: FU512-2DG1H-M85QZ-U7Z5T-PY8ZD
@@ -10,9 +10,9 @@
             VMware 12: AZ10A-DXWD5-H89UZ-QMNG9-M2RY8
 ----------------------------------------------------------------------
                        Auto-select versions
- If you used auto-select via the OS you are using, listen:
- W10/11 is 17, W8.1 is 16, W8/W7 RTM is 14 and W7 SP1 is 15.
- VMware 12 is just here for legacy CPUs that were made before 2010.
+    If you used auto-select via the OS you are using, listen:
+    W10/11 is 17, W8.1 is 16, W8/W7 RTM is 14 and W7 SP1 is 15.
+  VMware 12 is just here for legacy CPUs that were made before 2010.
 ----------------------------------------------------------------------
                     Document written by .galex_
                     Keys were given by eazyblack
