@@ -1,155 +1,59 @@
 @echo off
 
-:: Debugging launch parameter - /sudo
-if "%1" == "/sudo" @echo on
-if "%2" == "/sudo" @echo on
-
-:: Windows NT (kernel) release
-for /f "tokens=2 delims=[]" %%a in ('ver') do set ver=%%a
-for /f "tokens=2,3,4 delims=. " %%a in ("%ver%") do set v=%%a.%%b
-
-:: Windows Build Number (Windows 8+)
-for /F "tokens=2* skip=2" %%a in ('reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v "CurrentBuildNumber"') do set buildnumber=%%b
-
-:: Windows Service Pack (Windows 7)
-for /f "tokens=2 delims==" %%a in ('wmic os get ServicePackMajorVersion /value') do set ServicePack=%%a
-
-:: OS Architecture (x86_64/x86)
-reg Query "HKLM\Hardware\Description\System\CentralProcessor\0" | find /i "x86" >nul && set Arch=x86 || set Arch=x64
-
-:: Unsupported OSes
-if %v%==6.0 echo The Windows release that you are on is Vista, which is unsupported by us! Wait for the legacy pack :P & pause & exit
-if %v%==5.1 echo The Windows release that you are on is XP, which is unsupported by us! Wait for the legacy pack :P & pause & exit
-if %v%==5.0 echo The Windows release that you are on is 2000, which is unsupported by us! Wait for the legacy pack :P & pause & exit
-
-:: Unsupported OS Architecture
-if %Arch%==x86 echo "The Windows release that you are on is using the x86 architecture, which is unsupported by us!" & pause & exit
-
-:: Admin permissions
 openfiles >nul 2>&1
 if errorlevel 1 PowerShell -Command "Start-Process -Verb RunAs -FilePath '%comspec%' -ArgumentList '/c %~dpnx0'" & exit
-goto prepare
 
-:gxdiscord
-start "" https://discord.gg/3e46tHdHSu & goto start
+for /f "tokens=2 delims=[]" %%a in ('ver') do set ver=%%a
+for /f "tokens=2,3,4 delims=. " %%a in ("%ver%") do set v=%%a.%%b
+for /F "tokens=2* skip=2" %%a in ('reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v "CurrentBuildNumber"') do set buildnumber=%%b
+for /f "tokens=2 delims==" %%a in ('wmic os get ServicePackMajorVersion /value') do set ServicePack=%%a
+reg Query "HKLM\Hardware\Description\System\CentralProcessor\0" | find /i "x86" >nul && set arch=x86 || set arch=x64
 
-:prepare
 mode con: cols=80 lines=40
-set gxdir=%temp%\GXTemp
+set dir=%userprofile%\AppData\Local\Temp\GXTemp\
 set desktop=%userprofile%\Desktop
 set packversion=v1.3d
 set Build=Your build number: %buildnumber%
-if exist wget.exe xcopy /S /Q /Y /F wget.exe "%gxdir%"
-if exist %gxdir% cd /d %gxdir% & goto dependencies
->nul md %gxdir%
-cd /d %gxdir%
+if exist %dir% cd %dir% & goto check
+md %dir%
+cd /d %dir%
 
-:dependencies
-if exist wget.exe (
-    if exist 7za.exe (
-        if exist nsudo.exe (
-            goto start
-        ) else (
-            goto nsudo
+:check
+echo x=msgbox("Couldn't download required dependencies", 16, "GX_ Pack - No internet available") > nointernet.vbs
+echo x=msgbox("Your Windows version is unsupported.", 16, "GX_ Pack - Outdated Windows version") > outdatednt.vbs
+echo x=msgbox("The x86 architecture isn't supported.", 16, "GX_ Pack - Unsupported architecture") > x86arch.vbs
+ 
+if %v%==6.0 set winver=Vista & cscript //nologo %userprofile%\AppData\Local\Temp\GXTemp\outdatednt.vbs & exit
+if %v%==5.1 set winver=XP & cscript //nologo %userprofile%\AppData\Local\Temp\GXTemp\outdatednt.vbs & exit
+if %v%==5.0 set winver=2000 & cscript //nologo %userprofile%\AppData\Local\Temp\GXTemp\outdatednt.vbs & exit
+if %arch%==x86 cscript //nologo %userprofile%\AppData\Local\Temp\GXTemp\x86arch.vbs & exit
+ping -n 1 8.8.8.8 >nul && (cls) || (cscript //nologo %dir%\nointernet.vbs)
+
+title Downloading dependencies..
+if not exist wget.exe (
+    curl -fSSL -s https://eternallybored.org/misc/wget/1.21.4/32/wget.exe -o %temp%\GXTemp\wget.exe
+    if errorlevel 9009 (
+        powershell -Command "$AllProtocols = [System.Net.SecurityProtocolType]::Ssl3 -bor [System.Net.SecurityProtocolType]::Tls -bor [System.Net.SecurityProtocolType]::Tls11 -bor [System.Net.SecurityProtocolType]::Tls12; [System.Net.ServicePointManager]::SecurityProtocol = $AllProtocols; $ProgressPreference = 'SilentlyContinue'; $wc = New-Object net.webclient; $wc.Downloadfile('https://eternallybored.org/misc/wget/1.21.4/64/wget.exe', '%userprofile%\AppData\Local\Temp\GXTemp\wget.exe')"
+        if errorlevel 1 (
+            bitsadmin /transfer wget /download /priority high http://web.archive.org:80/web/20230511215022/https://eternallybored.org/misc/wget/1.21.4/32/wget.exe %temp%\GXTemp\wget.exe
         )
-    ) else (
-        goto 7z
     )
-) else (
-    goto wget
+    wget.exe --no-check-certificate -q -nc https://cdn.discordapp.com/attachments/1122511966167109634/1122513182938902579/7za.exe -O %temp%\GXTemp\7za.exe
+    wget.exe --no-check-certificate -q -nc https://cdn.discordapp.com/attachments/1122511966167109634/1122513183316393994/nsudo.exe -O %temp%\GXTemp\nsudo.exe
 )
 
-:wget
-title Downloading dependencies.. - WGET
-powershell -Command "$AllProtocols = [System.Net.SecurityProtocolType]::Ssl3 -bor [System.Net.SecurityProtocolType]::Tls -bor [System.Net.SecurityProtocolType]::Tls11 -bor [System.Net.SecurityProtocolType]::Tls12; [System.Net.ServicePointManager]::SecurityProtocol = $AllProtocols; $ProgressPreference = 'SilentlyContinue'; $wc = New-Object net.webclient; $wc.Downloadfile('https://eternallybored.org/misc/wget/1.21.4/64/wget.exe', '%userprofile%\AppData\Local\Temp\GXTemp\wget.exe')"
-if errorlevel 1 echo Failed downloading dependencies. Check your internet connection. & pause & exit /b
-:7z
-title Downloading dependencies.. - 7za
-if exist 7za.exe goto nsudo
-wget.exe --no-check-certificate -q https://cdn.discordapp.com/attachments/1122511966167109634/1122513182938902579/7za.exe -O 7za.exe
-:nsudo
-title Downloading dependencies.. - NSudo
-if exist nsudo.exe goto start
-wget.exe --no-check-certificate -q https://cdn.discordapp.com/attachments/1122511966167109634/1122513183316393994/nsudo.exe -O nsudo.exe
+
+
+
 
 :start
+cls
 if %v%==6.1 set OSID=1 & set winver=7
 if %v%==6.2 set OSID=2 & set winver=8
 if %v%==6.3 set OSID=3 & set winver=8.1
 if %v%==10.0 set OSID=4 & set winver=10
 if /I %buildnumber% GEQ 21996 set OSID=5 & set winver=11
-
-:: Start icon parameters:
-:: /w7 = Windows 7 start icon
-:: /w8_10 = Windows 8/8.1/10 start icon
-:: /w11 = Windows 11 start icon
-if "%1"=="/w7" goto w7
-if "%1"=="/w10_8" goto w10_8
-if "%1"=="/w11" goto w11
-
-if %winver%==7 goto w7
-if %winver%==11 goto w11
-goto w10_8
-
-
-
-
-
-:w7
 title GX_ Pack %packversion%
-cls
-echo.
-echo.
-echo             ,.=:!!t3Z3z.,
-echo          :tt:::tt333EE3
-echo         Et:::ztt33EEEL${c2} @Ee.,      ..,
-echo        ;tt:::tt333EE7${c2} ;EEEEEEttttt33#          
-echo       :Et:::zt333EEQ.${c2} $EEEEEttttt33QL          
-echo       it::::tt333EEF${c2} @EEEEEEttttt33F           
-echo      ;3=*^```"*4EEV${c2} :EEEEEEttttt33@.            Welcome to
-echo      ,.=::::!t=., ${c1}`${c2} @EEEEEEtt             GX_ Pack %packversion%!
-echo     ;::::::::zt33)${c2}   "4EEEtttji3P*             
-echo    :t::::::::tt33.${c4}:Z3z..${c2}  ``              Your OS: Windows %winver%
-echo    i::::::::zt33F${c4} AEEEtttt::::ztF
-echo   ;:::::::::t33V${c4} ;EEEttttt::::t3
-echo   E::::::::zt33L${c4} @EEEtttt::::z3F               
-echo   {3=*^```"*4E3)${c4} ;EEEtttt:::::tZ`              
-echo               `${c4} :EEEEtttt::::z7
-echo                    "VEzjt:;;z>*`
-echo.
-echo.
-echo                          1. Basic software
-echo                          2. Web applications
-echo                          3. Creator applications
-echo                          4. Games/Gaming software
-echo                          5. Configurations
-echo                          6. Virtualization software
-echo                          7. Runtimes/Development kits
-echo                          8. Custom software
-echo.
-echo                          9. Join our Discord server!
-echo                                  0. Exit.
-echo.
-echo.
-set /p choice=Enter your desired selection here: 
-if %choice%==1 goto software
-if %choice%==2 goto web
-if %choice%==3 goto productive
-if %choice%==4 goto gaming
-if %choice%==5 goto config
-if %choice%==6 goto virtualization
-if %choice%==7 goto runtime
-if %choice%==8 goto custom
-if %choice%==9 goto gxdiscord
-if %choice%==0 exit
-if %errorlevel%==1 echo %choice% is not a valid choice. Please try again. & pause & goto start
-
-
-
-:w10_8
-title GX_ Pack %packversion%
-cls
-echo.
 echo.
 echo.
 echo                          ....,,:;+ccllll
@@ -171,6 +75,52 @@ echo                             ````''*::cll
 echo                                       ``
 echo.
 echo.
+if %winver%==7 (
+    cls
+    echo.
+    echo.
+    echo              ,.=:!!t3Z3z.,
+    echo           :tt:::tt333EE3
+    echo          Et:::ztt33EEEL$c2 @Ee.,      ..,
+    echo         ;tt:::tt333EE7$c2 ;EEEEEEttttt33#          
+    echo        :Et:::zt333EEQ.$c2 $EEEEEttttt33QL          
+    echo        it::::tt333EEF$c2 @EEEEEEttttt33F           
+    echo       ;3=*^```"*4EEV$c2 :EEEEEEttttt33@.            Welcome to
+    echo       ,.=::::!t=., $c1`$c2 @EEEEEEtt             GX_ Pack %packversion%!
+    echo      ;::::::::zt33$c2   "4EEEtttji3P*             
+    echo     :t::::::::tt33.$c4:Z3z..$c2  ``              Your OS: Windows %winver%
+    echo     i::::::::zt33F$c4 AEEEtttt::::ztF
+    echo    ;:::::::::t33V$c4 ;EEEttttt::::t3
+    echo    E::::::::zt33L$c4 @EEEtttt::::z3F               
+    echo    3=*^```"*4E3)$c4 ;EEEtttt:::::tZ`              
+    echo                `$c4 :EEEEtttt::::z7
+    echo                     "VEzjt:;;z>*`
+    echo.
+    echo.
+)
+if %winver%==11 (
+    cls
+    echo.
+    echo.
+    echo    lllllllllllllll   lllllllllllllll
+    echo    lllllllllllllll   lllllllllllllll                Welcome to 
+    echo    lllllllllllllll   lllllllllllllll                GX_ Pack %packversion%!
+    echo    lllllllllllllll   lllllllllllllll                You're running: Windows %winver%
+    echo    lllllllllllllll   lllllllllllllll                %Build%
+    echo    lllllllllllllll   lllllllllllllll
+    echo    lllllllllllllll   lllllllllllllll
+    echo.                                 
+    echo    lllllllllllllll   lllllllllllllll
+    echo    lllllllllllllll   lllllllllllllll
+    echo    lllllllllllllll   lllllllllllllll                Choose options
+    echo    lllllllllllllll   lllllllllllllll                below.
+    echo    lllllllllllllll   lllllllllllllll
+    echo    lllllllllllllll   lllllllllllllll
+    echo    lllllllllllllll   lllllllllllllll
+    echo.
+    echo.
+)
+
 echo                          1. Basic software
 echo                          2. Web applications
 echo                          3. Creator applications
@@ -182,9 +132,17 @@ echo                          8. Custom software
 echo.
 echo                          9. Join our Discord server!
 echo                                  0. Exit.
-echo.
-echo.
-set /p choice=Enter your desired choice: 
+
+:: if anyone finds a better way of doing this i will be happy
+:: different amounts of 'echo.' for the choice to be at the bottom of the command window
+
+if %winver%==11 echo. & echo. & echo. & echo. & echo. & echo. & echo. & echo. & echo.
+if %winver%==10 echo. & echo. & echo. & echo. & echo. & echo. & echo.
+if %winver%==8.1 echo. & echo. & echo. & echo. & echo. & echo. & echo.
+if %winver%==8 echo. & echo. & echo. & echo. & echo. & echo. & echo.
+if %winver%==7 echo. & echo. & echo. & echo. & echo. & echo. & echo. & echo.
+
+set /p choice=Enter your desired selection here: 
 if %choice%==1 goto software
 if %choice%==2 goto web
 if %choice%==3 goto productive
@@ -193,68 +151,12 @@ if %choice%==5 goto config
 if %choice%==6 goto virtualization
 if %choice%==7 goto runtime
 if %choice%==8 goto custom
-if %choice%==9 goto gxdiscord
+if %choice%==9 start "" https://discord.gg/3e46tHdHSu & goto start
 if %choice%==0 exit
 if %errorlevel%==1 echo %choice% is not a valid choice. Please try again. & pause & goto start
-
-
-
-:w11
-title GX_ Pack %packversion%
-cls
-echo.
-echo.
-echo    lllllllllllllll   lllllllllllllll
-echo    lllllllllllllll   lllllllllllllll                Welcome to 
-echo    lllllllllllllll   lllllllllllllll                GX_ Pack %packversion%!
-echo    lllllllllllllll   lllllllllllllll                You're running: Windows %winver%
-echo    lllllllllllllll   lllllllllllllll                %Build%
-echo    lllllllllllllll   lllllllllllllll
-echo    lllllllllllllll   lllllllllllllll
-echo.                                 
-echo    lllllllllllllll   lllllllllllllll
-echo    lllllllllllllll   lllllllllllllll
-echo    lllllllllllllll   lllllllllllllll                Choose options
-echo    lllllllllllllll   lllllllllllllll                below.
-echo    lllllllllllllll   lllllllllllllll
-echo    lllllllllllllll   lllllllllllllll
-echo    lllllllllllllll   lllllllllllllll
-echo.
-echo.
-echo                          1. Basic software
-echo                          2. Web applications
-echo                          3. Creator applications
-echo                          4. Games/Gaming software
-echo                          5. Configurations
-echo                          6. Virtualization software
-echo                          7. Runtimes/Development kits
-echo                          8. Custom software
-echo.
-echo                          9. Join our Discord server!
-echo                                  0. Exit.
-echo.
-echo.
-set /p choice=Enter your desired choice: 
-if %choice%==1 goto software
-if %choice%==2 goto web
-if %choice%==3 goto productive
-if %choice%==4 goto gaming
-if %choice%==5 goto config
-if %choice%==6 goto virtualization
-if %choice%==7 goto runtime
-if %choice%==8 goto custom
-if %choice%==9 goto gxdiscord
-if %choice%==sudo @echo on & goto start
-if %choice%==0 exit
-if %errorlevel%==1 echo %choice% is not a valid choice. Please try again. & pause & goto start
-
-
-
-
 
 :software
-cls 
-title Basic software section - GX_ Pack %packversion%
+cls & title Basic software section - GX_ Pack %packversion%
 echo.
 echo.
 echo    -------------------- Choose a software application! --------------------
@@ -266,7 +168,7 @@ echo    ----------------------------- Utilities --------------------------------
 echo                4. CPU-Z                       8. Foxit Reader
 echo                5. GPU-Z                       9. TCPOptimizer
 echo                6. LightShot                   10. ShareX
-echo                7. CrystalDiskInfo             11. HWinfo
+echo                7. CrystalDiskInfo             11. HWInfo
 echo    ---------------------------- Media players -----------------------------
 echo                12. Kodi                       15. K-Lite Codec Pack
 echo                13. VLC                        16. mpv
@@ -278,17 +180,20 @@ echo    ---------------------------- System Tools ------------------------------
 echo                21. Process Hacker 2           33. Fences (paid)
 echo                22. Winlaunch                  34. Groupy (paid)
 echo                23. LibreOffice                35. UltraISO  
-echo                24. Mz CPU Accelerator         36. BCUninstaller
+echo                24. Mz CPU Accelerator         36. Bull Crap Uninstaller
 echo                25. Google Picasa 3            37. Everything Search
 echo                26. EasyBCD                    38. AltDrag
-echo                27. Flux                       39. VB-Audio Cable
+echo                27. Flux                       39. VB-Audio vbaudiocable
 echo                28. MiniBin                    40. WingetUI 
 echo                29. Unchecky                   41. Ueli                
 echo                30. WizFile                    42. AnyDesk                     
 echo                31. WizTree                    
 echo                32. Unlocker
-echo    ------------------------------ 0. Go back --------------------------------                    
-echo. & echo.
+echo    --------------------------------------------------------------------------
+echo.
+echo    --------------------------- 0. Go back -----------------------------------
+echo.
+echo.
 set /p choice=Enter your desired choice: 
 if %choice%==1 goto 7z
 if %choice%==2 goto caesium
@@ -296,14 +201,14 @@ if %choice%==3 goto nanazip
 if %choice%==4 goto cpuz
 if %choice%==5 goto gpuz
 if %choice%==6 goto lightshot
-if %choice%==7 goto cdi
-if %choice%==8 goto foxit
+if %choice%==7 goto crystaldiskinfo
+if %choice%==8 goto foxitreader
 if %choice%==9 goto tcpoptimizer
 if %choice%==10 goto sharex
-if %choice%==11 goto hwi
+if %choice%==11 goto hwinfo
 if %choice%==12 goto kodi
 if %choice%==13 goto vlc
-if %choice%==14 goto risemp
+if %choice%==14 goto risemediaplayer
 if %choice%==15 goto klitecodecpack
 if %choice%==16 goto mpv
 if %choice%==17 goto pcmanager
@@ -313,7 +218,7 @@ if %choice%==20 goto winmemorycleaner
 if %choice%==21 goto processhacker
 if %choice%==22 goto winlaunch
 if %choice%==23 goto libreoffice
-if %choice%==24 goto mzcpu
+if %choice%==24 goto mzcpuaccelerator
 if %choice%==25 goto picasa
 if %choice%==26 goto easybcd
 if %choice%==27 goto flux
@@ -325,10 +230,10 @@ if %choice%==32 goto unlocker
 if %choice%==33 goto fences
 if %choice%==34 goto groupy
 if %choice%==35 goto ultraiso
-if %choice%==36 goto bcu
-if %choice%==37 goto everything
+if %choice%==36 goto bullcrapuninstaller
+if %choice%==37 goto everythingsearch
 if %choice%==38 goto altdrag
-if %choice%==39 goto cable
+if %choice%==39 goto vbaudiocable
 if %choice%==40 goto wingetui
 if %choice%==41 goto ueli
 if %choice%==42 goto anydesk
@@ -342,72 +247,92 @@ if %errorlevel%==1 echo choice is not a valid choice. Please try again. & pause 
 :web
 cls & title Web app section - GX_ Pack %packversion%
 echo.
+echo    ----------------- Choose your web application/version! -------------------
+echo.   
+echo    ---------------------------- Uncategorized -------------------------------
+echo            1. Psiphon VPN        2. Proton VPN        3. iTunes
+echo            4. Revolt             5. Spotify           6. Speedtest
+echo            7. Telegram           8. Voicemod          9. WhatsApp
+echo            10. YT Music          11. LogMeIn Hamachi  12. Thunderbird
+echo    ------------------------------ Chrome ------------------------------------
+echo            13. Stable            14. Beta             15. Dev
+echo            16. Canary            17. Chromium         18. Chromium Ungoogled
+echo    ------------------------------ Discord -----------------------------------
+echo            19. Stable            20. Beta             21. Canary
+echo            22. Vencord           23. BetterDiscord    24. OpenAsar
+echo    ------------------------------ Edge --------------------------------------
+echo            25. Stable                                 26. Beta
+echo            27. Canary                                 28. Dev
+echo    ------------------------------ Firefox -----------------------------------
+echo            29. Stable                                 30. Beta
+echo            31. Dev Edition                            32. Nightly
+echo    ----------------------------- TeamViewer ---------------------------------
+echo            33. Full                                   34. QuickSupport
+echo            35. Host                                   36. Meeting
+echo    ------------------------------ Opera -------------------------------------
+echo            37. Opera                                  38. Opera GX
+echo    ------------------------------ Torrent -----------------------------------
+echo            39. qBitTorrent                            40. Deluge
+echo    ------------------------------ Vivaldi -----------------------------------
+echo            41. Latest                                 42. Legacy
+echo    ------------------------------ Waterfox ----------------------------------
+echo            43. Latest                                 44. Classic
+echo    ------------------------------ Radmin ------------------------------------
+echo            45. Radmin VPN                             46. Radmin Viewer
+echo    ----------------- Brave ----------------------------- Signal -------------
+echo            47. Brave                                  48. Signal        
+echo    --------------------------------------------------------------------------
 echo.
-echo    ------------ Choose your web application/version! ------------
-echo.                                                        
-echo    --------------------------- Chrome ---------------------------
-echo                  1. Stable               3. Dev
-echo                  2. Beta                 4. Canary
-echo    --------------------------- Edge -----------------------------
-echo                  5. Stable               7. Dev
-echo                  6. Beta                 8. Canary
-echo    -------------------------- Firefox ---------------------------
-echo                  9. Stable               11. Dev Edition
-echo                  10. Beta                12. Nightly
-echo    -------------------------- Waterfox --------------------------
-echo                  13. Latest              14. Classic
-echo    -------------------------- Vivaldi ---------------------------
-echo                  15. Latest              16. Legacy
-echo    -------------------------- Discord ---------------------------
-echo                  17. Stable              20. Vencord
-echo                  18. Beta                21. BetterDiscord
-echo                  19. Canary              22. OpenAsar
-echo    -------------------------- Torrent ---------------------------
-echo                  23. qBitTorrent         24. Deluge
-echo    ------------------------ Uncategorized -----------------------
-echo                  25. Revolt              30. Proton VPN
-echo                  26. Spotify             31. Psiphon VPN
-echo                  27. iTunes              32. Speedtest
-echo                  28. Telegram            33. Voicemod
-echo                  29. YT Music            34. WhatsApp
-echo    ------------------------- 0. Go back ------------------------- 
+echo    --------------------------- 0. Go back -----------------------------------
 echo.
-echo.
-set /p choice=Enter your desired choice: 
-if %choice%==1 goto chrome            
-if %choice%==2 goto chromebeta
-if %choice%==3 goto chromedev
-if %choice%==4 goto chromecanary
-if %choice%==5 goto edge
-if %choice%==6 goto edgebeta
-if %choice%==7 goto edgedev
-if %choice%==8 goto edgecanary
-if %choice%==9 goto firefox
-if %choice%==10 goto firefoxbeta
-if %choice%==11 goto firefoxdevedition
-if %choice%==12 goto firefoxnightly
-if %choice%==13 goto waterfox
-if %choice%==14 goto waterfoxclassic
-if %choice%==15 goto vivaldi
-if %choice%==16 goto vivaldilegacy
-if %choice%==17 goto discord
-if %choice%==18 goto discordbeta
-if %choice%==19 goto discordcanary
-if %choice%==20 goto vencord
-if %choice%==21 goto betterdiscord
-if %choice%==22 goto openasar
-if %choice%==23 goto qbit
-if %choice%==24 goto deluge
-if %choice%==25 goto revolt
-if %choice%==26 goto spotify
-if %choice%==27 goto itunes
-if %choice%==28 goto telegram
-if %choice%==29 goto youtubemusic
-if %choice%==30 goto proton
-if %choice%==31 goto psiphon
-if %choice%==32 goto speedtest
-if %choice%==33 goto voicemod
-if %choice%==34 start "" https://apps.microsoft.com/detail/whatsapp/9NKSQGP7F2NH?hl=ru-ru&gl=RU & goto web
+set /p choice=Enter your desired choice:  
+if %choice%==1 goto psiphonvpn
+if %choice%==2 goto protonvpn
+if %choice%==3 goto itunes
+if %choice%==4 goto revolt
+if %choice%==5 goto spotify
+if %choice%==6 goto speedtest
+if %choice%==7 goto telegram
+if %choice%==9 start "" https://apps.microsoft.com/detail/whatsapp/9NKSQGP7F2NH?hl=ru-ru&gl=RU & goto web
+if %choice%==10 goto ytmusic
+if %choice%==11 goto hamachi
+if %choice%==12 goto thunderbird
+if %choice%==13 goto chrome
+if %choice%==14 goto chromebeta
+if %choice%==15 goto chromedev
+if %choice%==16 goto chromecanary
+if %choice%==17 goto chromium
+if %choice%==18 goto chromiumungoogled
+if %choice%==19 goto discord
+if %choice%==20 goto discordbeta
+if %choice%==21 goto discordcanary
+if %choice%==22 goto vencord
+if %choice%==23 goto betterdiscord
+if %choice%==24 goto openasar
+if %choice%==25 goto edge
+if %choice%==26 goto edgebeta
+if %choice%==27 goto edgecanary
+if %choice%==28 goto edgedev
+if %choice%==29 goto firefox
+if %choice%==30 goto firefoxbeta
+if %choice%==31 goto firefoxdevedition
+if %choice%==32 goto firefoxnightly
+if %choice%==33 set "teamviewer=full" & goto teamviewer
+if %choice%==34 set "teamviewer=quicksupport" & goto teamviewer
+if %choice%==35 set "teamviewer=host" & goto teamviewer
+if %choice%==36 set "teamviewer=meeting" & goto teamviewer
+if %choice%==37 goto opera
+if %choice%==38 goto operagx
+if %choice%==39 goto qbit
+if %choice%==40 goto deluge
+if %choice%==41 goto vivaldi
+if %choice%==42 goto vivaldilegacy
+if %choice%==43 goto waterfox
+if %choice%==44 goto waterfoxclassic
+if %choice%==45 goto radminvpn
+if %choice%==46 goto radminviewer
+if %choice%==47 goto brave
+if %choice%==48 goto signal
 if %choice%==0 goto start
 if %errorlevel%==1 echo %choice% is not a valid choice. Please try again. & pause & goto web
 
@@ -416,62 +341,70 @@ if %errorlevel%==1 echo %choice% is not a valid choice. Please try again. & paus
 
 
 :productive
-cls & title productive section - GX Pack %packversion%
+cls & title Productive section - GX Pack %packversion%
 echo.
 echo.
 echo    ------------------ Choose your productivity software! --------------------
 echo.
 echo    ------------------ Programming software and languages --------------------
-echo.
-echo                   1. VSCode            8. Python 3.11.3
-echo                   2. VSCode Insider    9. Python 3.8.10
-echo                   3. Visual Studio     10. Python 2.7.18
-echo                   4. VSCodium          11. Rust
-echo                   5. Sublime Text 4    12. Git
-echo                   6. Sublime Text 3    13. Github Desktop
-echo                   7. Notepad++         14. Zealdocs
-echo.
+echo                   1. VSCode            10. Github Desktop
+echo                   2. VSCode Insider    11. Git
+echo                   3. Visual Studio     12. Zealdocs
+echo                   4. VSCodium          13. Python 3.12
+echo                   5. Sublime Text 4    14. Python 3.8.10
+echo                   6. Sublime Text 3    15. Python 2.7.18
+echo                   7. Sublime Merge     16. Rust
+echo                   8. Notepad++         17. Node.js (LTS 20.10)
+echo                   9. Jetbrains Toolbox 18. Node.js (21.5)
 echo    ------------------------ Creativity Software -----------------------------
-echo.
-echo                   15. Audacity         19. FL Studio 21 (Trial)
-echo                   16. Krita            20. Figma
-echo                   17. Paint.net        21. Figma Beta
-echo                   18. OBS Studio       22. Capcut
-echo.
+echo                   19. Audacity         24. FL Studio 21 (Trial)
+echo                   20. Krita            25. Figma
+echo                   21. Paint.net        26. Figma Beta
+echo                   22. OBS Studio       27. Capcut
+echo                   23. Kdenlive
 echo    ------------------------------ Other -------------------------------------
+echo                   28. Format Factory   31. Insomnia
+echo                   29. WinSCP           32. Postman
+echo                   30. PuTTY            33. FileZilla
+echo    --------------------------------------------------------------------------
 echo.
-echo                   23. Format Factory   25. PuTTY
-echo                   24. WinSCP           
-echo.
-echo    ---------------------------- 0. Go back ----------------------------------
+echo    --------------------------- 0. Go back -----------------------------------
 echo.
 echo.
 set /p choice=Enter your desired selection here: 
 if %choice%==1 goto vscode
 if %choice%==2 goto vscodeinsider
-if %choice%==3 goto visualstudio
+if %choice%==3 goto vs
 if %choice%==4 goto vscodium
-if %choice%==5 goto sublime4
-if %choice%==6 goto sublime3
-if %choice%==7 goto npp
-if %choice%==8 goto py3
-if %choice%==9 set py=1 & goto py3
-if %choice%==10 goto py2
-if %choice%==11 goto rust
-if %choice%==12 goto git
-if %choice%==13 goto github
-if %choice%==14 goto zealdocs
-if %choice%==15 goto audacity
-if %choice%==16 goto krita
-if %choice%==17 goto paintnet
-if %choice%==18 goto obs
-if %choice%==19 goto fl
-if %choice%==20 goto figma
-if %choice%==21 goto figmabeta
-if %choice%==22 goto capcut
-if %choice%==23 goto formatfactory
-if %choice%==24 goto winscp
-if %choice%==25 goto putty
+if %choice%==5 set sublimetext=4 & goto sublime
+if %choice%==6 set sublimetext=3 & goto sublime
+if %choice%==7 set sublimemerge=True & goto sublime
+if %choice%==8 goto npp
+if %choice%==9 goto jetbrainstoolbox
+if %choice%==10 goto github
+if %choice%==11 goto git
+if %choice%==12 goto zealdocs
+if %choice%==13 set python=latest & goto python
+if %choice%==14 set python=older & goto python
+if %choice%==15 set python=old & goto python
+if %choice%==16 goto rust
+if %choice%==17 set nodejs=lts & goto nodejs
+if %choice%==18 goto nodejs
+if %choice%==19 goto audacity
+if %choice%==20 goto krita
+if %choice%==21 goto paintnet
+if %choice%==22 goto obs
+if %choice%==23 goto kdenlive
+if %choice%==24 goto flstudio
+if %choice%==25 goto figma
+if %choice%==26 goto figmabeta
+if %choice%==27 goto capcut
+if %choice%==28 goto formatfactory
+if %choice%==29 goto winscp
+if %choice%==30 goto putty
+if %choice%==31 goto insomnia
+if %choice%==32 goto postman
+if %choice%==33 goto filezilla
 if %choice%==0 goto start
 if errorlevel 1 echo %choice% is not a valid choice. Please try again. & pause & goto productive
 
@@ -489,31 +422,27 @@ echo                 1. Steam                 5. Curseforge
 echo                 2. Epic Games            6. Electronic Arts
 echo                 3. FACEIT                7. Battle.net
 echo                 4. Modrinth              8. Ubisoft
-echo.
 echo    -------------------------- Performance Tools -----------------------------
 echo                 9. MSI Afterburner       11. AMD Adrenalin Software
 echo                 10. GeForce Experience
-echo.
 echo    ------------------------ Gaming Utilities --------------------------------
 echo                 12. Razer Cortex         16. Bloody Mouse Software
 echo                 13. Steelseries GG       17. AutoHotKey
 echo                 14. Cheat Engine         18. JKPS
 echo                 15. Corsair iCue
-echo.
 echo    --------------------------- Emulators ------------------------------------
 echo                 19. Nox Player           21. RetroArch (Stable)
 echo                 20. Bluestacks           22. RetroArch (Nightly)
-echo.
 echo    --------------------------- Minecraft ------------------------------------
 echo                 23. Minecraft Launcher   27. Legacy Minecraft Launcher
 echo                 24. Lunar Client         28. Badlion Client
 echo                 25. Feather Client       29. Prism Launcher
 echo                 26. SKLauncher           30. Technix Client
-echo.
 echo    --------------------------- Other games ----------------------------------
 echo                 31. CSS v34 ClientMod    34. Roblox
 echo                 32. Osu!                 35. 3D Pinball
 echo                 33. Osu! Lazer
+echo    --------------------------------------------------------------------------
 echo.
 echo    --------------------------- 0. Go back -----------------------------------
 echo.
@@ -561,31 +490,27 @@ if %errorlevel%==1 echo %choice% is not a valid choice. Please try again. & paus
 
 
 :config
-cls 
-title Configuration section - GX_ Pack %packversion%
+cls & title Configuration section - GX_ Pack %packversion%
 echo.
+echo    ----------------- Select the configurations to install -------------------
 echo.
-echo         Select the configurations to install.
+echo    ---------------------------- Customizers ---------------------------------
+echo                 1. StartIsBack++ (W10)    3. StartIsBack (W8)
+echo                 2. StartIsBack+ (W8.1)    4. StartAllBack (W11)
+echo                 5. Rainmeter
+echo    ----------------------- Windows system utilities -------------------------
+echo                 6. AME Wizard (W10+)      10. Winaero Tweaker
+echo                 7. Atlas Playbook (W10)   11. OldNewExplorer (W8+)
+echo                 8. ExplorerPatcher (W11)  12. 7+ Taskbar Tweaker
+echo                 9. SecureUXThemePatcher   13. BloatyNosy (W11)         
+echo    -------------------------- Additional tweaks -----------------------------
+echo                 14. Rectify11             18. ContextMenuNormalizer (W10)
+echo                 15. AccentColorizer (W8+) 19. DragDropNormalizer
+echo                 16. CTT's WinUtil         20. TranslucentTB (W10+)
+echo                 17. Windhawk (W10+)       21. PowerToys (W10+)
+echo    --------------------------------------------------------------------------
 echo.
-echo                      Customizers
-echo    1. StartIsBack++ (W10)    3. StartIsBack (W8)
-echo    2. StartIsBack+ (W8.1)    4. StartAllBack (W11)
-echo    5. Rainmeter
-echo.
-echo               Windows system utilities
-echo    6. AME Wizard (W10+)      10. Winaero Tweaker
-echo    7. Atlas Playbook (W10)   11. OldNewExplorer (W8+)
-echo    8. ExplorerPatcher (W11)  12. 7+ Taskbar Tweaker
-echo    9. SecureUXThemePatcher   13. BloatyNosy (W11)
-echo.
-echo                    Additional tweaks
-echo    14. Rectify11             18. ContextMenuNormalizer (W10)
-echo    15. AccentColorizer (W8+) 19. DragDropNormalizer
-echo    16. CTT's WinUtil         20. TranslucentTB (W10+)
-echo    17. Windhawk (W10+)       21. PowerToys (W10+)
-echo.    
-echo.
-echo    0. Go back
+echo    --------------------------- 0. Go back -----------------------------------
 echo.
 echo.
 set /p choice=Enter your desired selection here: 
@@ -622,23 +547,21 @@ cls
 title Virtualization software section - GX_ Pack %packversion%
 echo.
 echo.
-echo    Choose your virtualization software!
+echo    ---------------- Choose your virtualization software! --------------------
 echo.
-echo    VMware Workstation
-echo    1. Latest for your OS
-echo    2. 17 (10+)     3. 16 (8.1)
-echo    4. 15 (7 SP1/8) 5. 14 (7)
-echo    6. 12 (Legacy CPUs)
-echo    Pick option 1 if you don't know what to select.
+echo    ------------------------- VMware Workstation -----------------------------
+echo                 1. Latest for your OS      2. 17 (10+) 
+echo                 3. 16 (8.1)                4. 15 (7 SP1/8)
+echo                 5. 14 (7)                  6. 12 (Legacy CPUs)                
+echo                Pick option 1 if you don't know what to select.
+echo    ---------------------------- Virtualbox ----------------------------------
+echo                 7. 7.0.8 (Latest)          8. 6.1
+echo                 9. 5.2
+echo    --------------------------- Uncategorized --------------------------------
+echo                 10. Qemu                   11. Hyper-V (W8+)
+echo    --------------------------------------------------------------------------
 echo.
-echo    Virtualbox
-echo    7. 7.0.8 (Latest)
-echo    8. 6.1          9. 5.2
-echo.
-echo    Uncategorized
-echo    10. Qemu        11. Hyper-V (W8+)
-echo.
-echo    0. Go back
+echo    --------------------------- 0. Go back -----------------------------------
 echo.
 echo.
 set /p choice=Enter your desired selection here:  
@@ -669,7 +592,7 @@ echo    ---------------------- Choose your Runtime/SDK! ------------------------
 echo.
 echo    ---------------------------- Runtimes -----------------------------------
 echo.
-echo                   1. VCRedist AIO           7. .NET 8 Preview 4
+echo                   1. VCRedist AIO           7. .NET 8
 echo                   2. Java 8                 8. .NET 7
 echo                   3. .NET Framework 4.8.1   9. .NET 6
 echo                   4. .NET Framework 4.8     10. .NET Core 3.1
@@ -679,7 +602,7 @@ echo.
 echo    -------------------------- Development Kits ----------------------------
 echo.
 echo                   13. Java 20               16. .NET 6
-echo                   14. .NET 8 Preview 4      17. .NET Core 3.1
+echo                   14. .NET 8                17. .NET Core 3.1
 echo                   15. .NET 7
 echo.
 echo    ---------------------------- 0. Go back --------------------------------
@@ -692,14 +615,14 @@ if %choice%==3 goto netframework481
 if %choice%==4 goto netframework48
 if %choice%==5 goto netframework472
 if %choice%==6 goto netframework452
-if %choice%==7 goto net8runp4
+if %choice%==7 goto net8run
 if %choice%==8 goto net7run
 if %choice%==9 goto net6run
 if %choice%==10 goto net31sdk
 if %choice%==11 goto xna
 if %choice%==12 goto updatepack7r2
 if %choice%==13 goto java20jdk
-if %choice%==14 goto net8sdkp4
+if %choice%==14 goto net8sdk
 if %choice%==15 goto net7sdk
 if %choice%==16 goto net6sdk
 if %choice%==17 goto net31run
@@ -816,7 +739,7 @@ pause
 del java8jre.exe
 goto runtime
 :net8sdk
-wget.exe --no-check-certificate "https://download.visualstudio.microsoft.com/download/pr/1b55b379-5ef2-4f21-8fad-aba058913cbc/c26ee3ba55cb40407a79564e28ed6d98/dotnet-sdk-8.0.100-preview.4.23260.5-win-x64.exe" -O net8sdk.exe
+wget.exe --no-check-certificate "https://download.visualstudio.microsoft.com/download/pr/93961dfb-d1e0-49c8-9230-abcba1ebab5a/811ed1eb63d7652325727720edda26a8/dotnet-sdk-8.0.100-win-x64.exe" -O net8sdk.exe
 net8sdk.exe /quiet /norestart
 pause
 del net8sdk.exe
@@ -983,7 +906,7 @@ goto config
 :oldnewexplorer
 wget.exe --no-check-certificate "https://files1.majorgeeks.com/10afebdbffcd4742c81a3cb0f6ce4092156b4375/appearance/OldNewExplorer.zip" -O OldNewExplorer.zip
 7za e OldNewExplorer.zip -aoa >nul
-xcopy "%gxdir%\OldNewExplorer" %programfiles%\ /E /H /C /I
+xcopy "%dir%\OldNewExplorer" %programfiles%\ /E /H /C /I
 %programfiles%\OldNewExplorer\OldNewExplorerCfg.exe
 pause 
 del OldNewExplorer.zip
@@ -1163,7 +1086,9 @@ MSIAfterburnerSetup465.exe /S
 pause
 del msiafterburner.zip
 rd /S /Q Guru3D.com
+del downloaded_from_www.guru3d.com.txt
 del MSIAfterburnerSetup465.exe
+del guru3d.url
 goto gaming
 :amd
 wget.exe --no-check-certificate "https://cdn.discordapp.com/attachments/1088474021923917944/1110577745915805808/amd-software-adrenalin-edition-23.4.3-minimalsetup-230427_web.exe" -O amd.exe
@@ -1255,7 +1180,7 @@ pause
 del cheatengine.exe
 goto gaming
 :vscode
-set "url=https://az764295.vo.msecnd.net/stable/b3e4e68a0bc097f0ae7907b217c1119af9e03435/VSCodeSetup-x64-1.78.2.exe"
+set "url=https://code.visualstudio.com/sha/download?build=stable&os=win32-x64"
 if %OSID% LEQ 2 set "url=https://az764295.vo.msecnd.net/stable/e4503b30fc78200f846c62cf8091b76ff5547662/VSCodeSetup-x64-1.70.2.exe"
 wget.exe --no-check-certificate %url% -O vscode.exe
 vscode.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
@@ -1268,22 +1193,31 @@ vscodeinsider.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
 pause
 del vscodeinsider.exe
 goto productive
+:vs
+wget.exe --no-check-certificate "https://cdn.discordapp.com/attachments/1122511966167109634/1180466536532676648/5LYrF64.exe" -O "vs.exe"
+vs.exe
+pause
+del vs.exe
+goto productive
 :vscodium
-set "url=https://github.com/VSCodium/vscodium/releases/download/1.78.2.23132/VSCodium-x64-1.78.2.23132.msi"
+set "url=https://github.com/VSCodium/vscodium/releases/download/1.84.2.23319/VSCodium-x64-1.84.2.23319.msi"
 if %OSID% LEQ 2 set "url=https://github.com/VSCodium/vscodium/releases/download/1.70.2.22230/VSCodium-x64-1.70.2.22230.msi"
 wget.exe --no-check-certificate %url% -O vscodium.msi
 vscodium.msi /quiet /norestart
 pause
 del vscodium.msi
 goto productive
-:sublime4
-wget.exe --no-check-certificate "https://download.sublimetext.com/sublime_text_build_4143_x64_setup.exe" -O sublime.exe
-sublime.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
-pause
-del sublime.exe
-goto productive
-:sublime3
-wget.exe --no-check-certificate "https://download.sublimetext.com/Sublime%20Text%20Build%203211%20x64%20Setup.exe" -O sublime.exe
+:sublime
+if %sublimetext%==4 (
+    set "%url=https://download.sublimetext.com/sublime_text_build_4143_x64_setup.exe"
+)
+if %sublimetext%==3 (
+    set "%url%=https://download.sublimetext.com/Sublime%20Text%20Build%203211%20x64%20Setup.exe"
+)
+if %sublimemerge%==True (
+    set "%url%=https://download.sublimetext.com/sublime_merge_build_2091_x64_setup.exe"
+)
+wget.exe --no-check-certificate %url% -O sublime.exe
 sublime.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
 pause
 del sublime.exe
@@ -1294,26 +1228,60 @@ npp.exe /S
 pause
 del npp.exe
 goto productive
-:py3
-set "url=https://www.python.org/ftp/python/3.11.3/python-3.11.3-amd64.exe"
-if %OSID% LEQ 2 set "url=https://www.python.org/ftp/python/3.8.10/python-3.8.10-amd64.exe"
-if %py%==1 set "url=https://www.python.org/ftp/python/3.8.10/python-3.8.10-amd64.exe"
-wget.exe --no-check-certificate %url% -O py.exe
-py.exe /quiet /norestart InstallAllUsers=1 PrependPath=1 Include_test=1 Include_pip=1 AssociateFiles=1 Shortcuts=0 Include_launcher=1
+:jetbrainstoolbox
+wget.exe --no-check-certificate "https://download.jetbrains.com/toolbox/jetbrains-toolbox-2.1.3.18901.exe" -O jetbrainstoolbox.exe
+jetbrainstoolbox.exe /S
 pause
-del py.exe
+del jetbrainstoolbox.exe
 goto productive
-:py2
-wget.exe --no-check-certificate "https://www.python.org/ftp/python/2.7.18/python-2.7.18.amd64.msi" -O py.msi
-py.msi /quiet /norestart
-pause
-del py.exe
+:python
+if %python%==latest (
+    set "url=https://www.python.org/ftp/python/3.12.0/python-3.12.0-amd64.exe"
+)
+if %OSID% LEQ 2 (
+    set "url=https://www.python.org/ftp/python/3.8.10/python-3.8.10-amd64.exe"
+)
+if %python%==older (
+    set "url=https://www.python.org/ftp/python/3.8.10/python-3.8.10-amd64.exe"
+)
+if %python%==old (
+    wget.exe --no-check-certificate "https://www.python.org/ftp/python/2.7.18/python-2.7.18.amd64.msi" -O python.msi
+    python.msi /quiet /norestart
+    pause
+    del python.msi
+)
+if %python%==latest (
+    wget.exe --no-check-certificate %url% -O python.exe
+    python.exe /quiet /norestart InstallAllUsers=1 PrependPath=1 Include_test=1 Include_pip=1 AssociateFiles=1 Shortcuts=0 Include_launcher=1
+    pause
+    del python.exe
+)
 goto productive
 :rust
 wget.exe --no-check-certificate "https://static.rust-lang.org/rustup/dist/x86_64-pc-windows-msvc/rustup-init.exe" -O rust.exe
 rust.exe
 pause
 del rust.exe
+goto productive
+:node_js
+set url=https://nodejs.org/dist/v21.5.0/node-v21.5.0-x64.msi
+if nodejs==lts set url=https://nodejs.org/dist/v20.10.0/node-v20.10.0-x64.msi
+wget.exe --no-check-certificate %url% -O nodejs.msi
+nodejs.msi /quiet /norestart
+pause
+del nodejs.msi
+goto productive
+:androidstudio
+wget.exe --no-check-certificate "https://redirector.gvt1.com/edgedl/android/studio/install/2023.1.1.26/android-studio-2023.1.1.26-windows.exe" -O android-studio.exe
+android-studio.exe /S
+pause
+del android-studio.exe
+goto productive
+:eclipse
+wget.exe --no-check-certificate "https://www.eclipse.org/downloads/download.php?file=/oomph/epp/2023-12/R/eclipse-inst-jre-win64.exe&mirror_id=1190" -O eclipse.exe
+eclipse.exe
+pause
+del eclipse.exe
 goto productive
 :git
 wget.exe --no-check-certificate "https://github.com/git-for-windows/git/releases/download/v2.40.1.windows.1/Git-2.40.1-64-bit.exe" -O git.exe
@@ -1377,11 +1345,29 @@ obs.exe /S
 pause
 del obs.exe
 goto productive
-:fl
-wget.exe --no-check-certificate "https://demodownload.image-line.com/flstudio/flstudio_win64_21.1.0.3713.exe" -O fl.exe
-fl.exe /S
+:kdenlive
+wget.exe --no-check-certificate "https://download.kde.org/stable/kdenlive/23.08/windows/kdenlive-23.08.4.exe" -O kdenlive.exe
+kdenlive.exe /S
 pause
-del fl.exe
+del kdenlive.exe
+goto productive
+:postman
+wget.exe --no-check-certificate "https://dl.pstmn.io/download/latest/win64" -O postman.exe
+postman.exe
+pause
+del postman.exe
+goto productive
+:filezilla
+wget.exe --no-check-certificate "https://download.filezilla-project.org/client/FileZilla_3.66.4_win64_sponsored2-setup.exe" -O filezilla.exe
+filezilla.exe /S
+pause
+del filezilla.exe
+goto productive
+:flstudio
+wget.exe --no-check-certificate "https://demodownload.image-line.com/flstudio/flstudio_win64_21.1.0.3713.exe" -O flstudio.exe
+flstudio.exe /S
+pause
+del flstudio.exe
 goto productive
 :formatfactory
 wget.exe --no-check-certificate "https://sdl.adaware.com/?bundleid=FF001&savename=FF001.exe" -O FF001.exe
@@ -1400,6 +1386,12 @@ wget.exe --no-check-certificate "https://the.earth.li/~sgtatham/putty/latest/w64
 putty.msi /quiet /norestart
 pause
 del putty.msi
+goto productive
+:insomnia
+wget.exe --no-check-certificate "https://updates.insomnia.rest/downloads/windows/latest?app=com.insomnia.app&source=website" -O insomnia.exe
+insomnia.exe
+pause
+del insomnia.exe
 goto productive
 :nox
 wget.exe --no-check-certificate "https://res06.bignox.com/full/20230809/1ce3677ee94f4a5ea6789c868459e15e.exe?filename=nox_setup_v7.0.5.8_full_intl.exe" -O nox.exe
@@ -1445,6 +1437,40 @@ wget.exe --no-check-certificate "https://cdn.discordapp.com/attachments/10884740
 chromecanary.exe
 pause
 del chromecanary.exe
+goto web
+:chromium
+set url=https://github.com/Hibbiki/chromium-win64/releases/download/v119.0.6045.160-r1204232/mini_installer.sync.exe
+if %osid% LSS 4 set url=https://github.com/Hibbiki/chromium-win64/releases/download/v109.0.5414.120-r1070088/mini_installer.sync.exe
+wget.exe --no-check-certificate %url% -O chromium.exe
+chromium.exe
+pause
+del chromium.exe
+goto web
+:ungoogled
+set url=https://github.com/macchrome/winchrome/releases/download/v119.6045.110-M119.0.6045.110-r1204232-Win64/119.0.6045.110_ungoogled_mini_installer.exe
+if %osid% LSS 4 set url=https://github.com/macchrome/winchrome/releases/download/v109.5414.120-M109.0.5414.120-r1070088-Win64/109.0.5414.120_ungoogled_mini_installer.exe
+wget.exe --no-check-certificate %url% -O chromiumungoogled.exe
+chromiumungoogled.exe
+pause
+del chromiumungoogled.exe
+goto web
+:opera
+wget.exe --no-check-certificate "https://net.geo.opera.com/opera/stable/windows?edition=Yx+05&utm_source=%28direct%29&utm_medium=doc&utm_campaign=%28direct%29&http_referrer=missing&utm_site=opera_com&utm_lastpage=opera.com%2Fbrowsers%2Fopera&dl_token=31226604" -O opera.exe
+opera.exe
+pause
+del opera.exe
+goto web
+:operagx
+wget.exe --no-check-certificate "https://net.geo.opera.com/opera_gx/stable/windows?edition=Yx+GX&utm_source=%28direct%29&utm_medium=doc&utm_campaign=%28direct%29&http_referrer=missing&utm_site=opera_com&utm_lastpage=opera.com%2Fdiscord-nitro&dl_token=55255059" -O operagx.exe
+operagx.exe
+pause
+del operagx.exe
+goto web
+:brave
+wget.exe --no-check-certificate "https://referrals.brave.com/latest/BraveBrowserSetup-BRV010.exe" -O brave.exe
+brave.exe
+pause
+del brave.exe
 goto web
 :edge
 wget.exe --no-check-certificate "https://c2rsetup.officeapps.live.com/c2r/downloadEdge.aspx?platform=Default&source=EdgeStablePage&Channel=Stable&language=en&brand=M100" -O edge.exe
@@ -1587,11 +1613,29 @@ telegram.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
 pause
 del telegram.exe
 goto web
-:whatsapp
-wget.exe --no-check-certificate "" -O whatsapp.appx
-whatsapp.appx
+:signal
+wget.exe --no-check-certificate "https://updates.signal.org/desktop/signal-desktop-win-6.42.0.exe" -O signal.exe
+signal.exe /S
 pause
-del whatsapp.appx
+del signal.exe
+goto web
+:teamviewer
+if teamviewer==host (
+    set "url=https://dl.teamviewer.com/download/TeamViewer_Host_Setup_x64.exe?ref=https%3A%2F%2Fwww.teamviewer.com%2Fru-cis%2Fdownload%2Fwindows%2F"
+)
+if teamviewer==meeting (
+    set "url=https://dl.teamviewer.com/teamviewermeeting/installer/win/15.48.5/TeamViewerMeeting_Setup_x64.exe?ref=https%3A%2F%2Fwww.teamviewer.com%2Fru-cis%2Fdownload%2Fwindows%2F"
+)
+if teamviewer==quicksupport (
+    set "url=https://dl.teamviewer.com/download/TeamViewerQS_x64.exe?ref=https%3A%2F%2Fwww.teamviewer.com%2Fru-cis%2Fdownload%2Fwindows%2F"
+)
+if teamviewer==full (
+    set "url=https://dl.teamviewer.com/download/version_15x/TeamViewer_Setup_x64.exe?ref=https%3A%2F%2Fwww.teamviewer.com%2Fru-cis%2Fdownload%2Fwindows%2F
+)
+wget.exe --no-check-certificate %url% -O teamviewer.exe
+teamviewer.exe /S
+pause
+del teamviewer.exe
 goto web
 :youtubemusic
 wget.exe --no-check-certificate "https://github.com/th-ch/youtube-music/releases/download/v1.20.0/YouTube-Music-Setup-1.20.0.exe" -O youtubemusic.exe
@@ -1599,17 +1643,30 @@ youtubemusic.exe
 pause
 del youtube-music.exe
 goto web
-:proton
+:protonvpn
 set "url=https://protonvpn.com/download/ProtonVPN_v3.0.7.exe"
 if %OSID% LEQ 3 set "url=https://protonvpn.com/download/ProtonVPN_win_v2.4.2.exe"
-wget.exe --no-check-certificate %url% -O proton.exe
-proton.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
+wget.exe --no-check-certificate %url% -O protonvpn.exe
+protonvpn.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
 pause
-del proton.exe
+del protonvpn.exe
 goto web
-:psiphon
-wget.exe --no-check-certificate "https://cdn.discordapp.com/attachments/1122511966167109634/1158612745063768075/Psiphon_VPN.exe?ex=651ce1b4&is=651b9034&hm=33364737a7cb9a14dfbac6fbbf17d76a9dc3e422898813eb5f45b81add689579&" -O %Desktop%\psiphon.exe
-psiphon.exe
+:thunderbird
+wget.exe --no-check-certificate "https://download-installer.cdn.mozilla.net/pub/thunderbird/releases/115.6.0/win64/ru/Thunderbird%20Setup%20115.6.0.exe" -O thunderbird.exe
+echo --- No silent install function detected. Please, navigate through the installer GUI to install. ---
+thunderbird.exe
+pause
+del thunderbird.exe
+goto web
+:hamachi
+wget.exe --no-check-certificate "https://secure.logmein.com/hamachi.msi" -O hamachi.msi
+hamachi.msi /quiet /norestart
+pause
+del hamachi.msi
+goto web
+:psiphonvpn                  
+wget.exe --no-check-certificate "https://cdn.discordapp.com/attachments/1122511966167109634/1158612745063768075/psiphonvpn_VPN.exe?ex=651ce1b4&is=651b9034&hm=33364737a7cb9a14dfbac6fbbf17d76a9dc3e422898813eb5f45b81add689579&" -O %Desktop%\psiphonvpn.exe
+psiphonvpn.exe
 goto web
 :speedtest
 wget.exe --no-check-certificate "https://install.speedtest.net/app/windows/latest/speedtestbyookla_x64.msi" -O speedtest.msi
@@ -1622,6 +1679,12 @@ wget.exe --no-check-certificate "https://www.voicemod.net/b2c/v2/VoicemodSetup_2
 voicemod.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
 pause
 del voicemod.exe
+goto web
+:radminvpn
+wget.exe --no-check-certificate "https://download.radmin-vpn.com/download/files/Radmin_VPN_1.4.4642.1.exe" -O radminvpn.exe
+radminvpn.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
+pause
+del radminvpn.exe
 goto web
 :7z
 wget.exe --no-check-certificate "https://www.7-zip.org/a/7z2201-x64.msi" -O 7z.msi
@@ -1641,11 +1704,11 @@ vlc.msi /quiet
 pause
 del vlc.msi
 goto software
-:risemp
-wget.exe --no-check-certificate "https://github.com/Rise-Software/Rise-Media-Player/releases/download/v0.0.300.0/RiseSoftware.RiseMP.V0.0.300.0.msixbundle" -O risemp.appx
-risemp.appx
+:risemediaplayer
+wget.exe --no-check-certificate "https://github.com/Rise-Software/Rise-Media-Player/releases/download/v0.0.300.0/RiseSoftware.risemediaplayer.V0.0.300.0.msixbundle" -O risemediaplayer.appx
+risemediaplayer.appx
 pause
-del risemp.appx
+del risemediaplayer.appx
 goto software
 :klitecodecpack
 wget.exe --no-check-certificate "https://files2.codecguide.com/K-Lite_Codec_Pack_1785_Full.exe" -O klitecodecpack.exe
@@ -1659,11 +1722,11 @@ libreoffice.msi /quiet /norestart
 pause
 del libreoffice.msi
 goto software
-:foxit
-wget.exe --no-check-certificate "https://cdn78.foxitsoftware.com/product/phantomPDF/desktop/win/2023.2.0/FoxitPDFReader20232_L10N_Setup_Prom.exe" -O foxit.exe
-foxit.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
+:foxitreader
+wget.exe --no-check-certificate "https://cdn78.foxitreadersoftware.com/product/phantomPDF/desktop/win/2023.2.0/foxitreaderPDFReader20232_L10N_Setup_Prom.exe" -O foxitreader.exe
+foxitreader.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
 pause
-del foxit.exe
+del foxitreader.exe
 goto software
 :tcpoptimizer
 wget.exe --no-check-certificate "https://www.speedguide.net/files/TCPOptimizer.exe" -O tcpoptimizer.exe
@@ -1702,20 +1765,20 @@ picasa.exe /S
 pause
 del picasa.exe
 goto software
-:hwi
-wget.exe --no-check-certificate "https://www.sac.sk/download/utildiag/hwi_746.exe" -O hwi.exe
-hwi.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
+:hwinfo
+wget.exe --no-check-certificate "https://www.sac.sk/download/utildiag/hwinfo_746.exe" -O hwinfo.exe
+hwinfo.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
 pause
-del hwi.exe
+del hwinfo.exe
 goto software
-:cdi
-wget.exe --no-check-certificate "https://crystalmark.info/download/zz/CrystalDiskInfo9_1_1.exe" -O cdi.exe
-cdi.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
+:crystaldiskinfo
+wget.exe --no-check-certificate "https://crystalmark.info/download/zz/CrystalDiskInfo9_1_1.exe" -O crystaldiskinfo.exe
+crystaldiskinfo.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
 pause
-del cdi.exe
+del crystaldiskinfo.exe
 goto software
 :easybcd
-wget.exe --no-check-certificate https://files03.tchspt.com/temp/EasyBCD2.4.exe -O "EasyBCD 2.4.exe"
+wget.exe --no-check-certificate https://924j2k.securedfile.ru/b2/2/3/909aba20b3c6f3b9957fe18ac0e50ca2/EasyBCD_2.4.exe -O "EasyBCD 2.4.exe"
 "EasyBCD 2.4.exe" /S
 pause
 del "EasyBCD 2.4.exe"
@@ -1765,11 +1828,11 @@ caesium.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
 pause
 del caesium.exe
 goto software
-:mzcpu
-wget.exe --no-check-certificate "https://files1.majorgeeks.com/10afebdbffcd4742c81a3cb0f6ce4092156b4375/processor/mzcpu.exe" -O mzcpu.exe
-mzcpu.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
+:mzcpuaccelerator
+wget.exe --no-check-certificate "https://files1.majorgeeks.com/10afebdbffcd4742c81a3cb0f6ce4092156b4375/processor/mzcpuaccelerator.exe" -O mzcpuaccelerator.exe
+mzcpuaccelerator.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
 pause
-del mzcpu.exe
+del mzcpuaccelerator.exe
 goto software
 :winlaunch
 wget.exe --no-check-certificate "https://nav.dl.sourceforge.net/project/winlaunch/WinLaunchInstaller.exe" -O winlaunch.exe
@@ -1800,11 +1863,11 @@ md %Desktop%\Optimizer
 wget.exe --no-check-certificate "https://github.com/hellzerg/optimizer/releases/download/15.3/Optimizer-15.3.exe" -O %Desktop%\Optimizer\Optimizer.exe
 %Desktop%\Optimizer\Optimizer.exe
 goto software
-:bcu
-wget.exe --no-check-certificate "https://github.com/Klocman/Bulk-Crap-Uninstaller/releases/download/v5.6/BCUninstaller_5.6_setup.exe" -O bcu.exe
-bcu.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
+:bullcrapuninstaller
+wget.exe --no-check-certificate "https://github.com/Klocman/Bulk-Crap-Uninstaller/releases/download/v5.7/bullcrapuninstallerninstaller_5.7_setup.exe" -O bullcrapuninstaller.exe
+bullcrapuninstaller.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
 pause
-del bcu.exe
+del bullcrapuninstaller.exe
 goto software
 :ultraiso
 wget.exe --no-check-certificate "https://www.ultraiso.com/uiso9_pe.exe" -O ultraiso.exe
@@ -1818,11 +1881,11 @@ sharex.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
 pause
 del sharex.exe
 goto software
-:everything
-wget.exe --no-check-certificate "https://www.voidtools.com/Everything-1.4.1.1024.x64-Setup.exe" -O everything.exe
-everything.exe /S
+:everythingsearch
+wget.exe --no-check-certificate "https://www.voidtools.com/everythingsearch-1.4.1.1024.x64-Setup.exe" -O everythingsearch.exe
+everythingsearch.exe /S
 pause
-del everything.exe
+del everythingsearch.exe
 goto software
 :altdrag
 wget.exe --no-check-certificate "https://github.com/stefansundin/altdrag/releases/download/v1.1/AltDrag-1.1.exe" -O altdrag.exe
@@ -1830,13 +1893,13 @@ altdrag.exe /S
 pause
 del altdrag.exe
 goto software
-:cable
-wget.exe --no-check-certificate "https://download.vb-audio.com/Download_CABLE/VBCABLE_Driver_Pack43.zip" -O cable.zip
-7za e cable.zip -o"cable" -aoa >nul
-"cable\VBCABLE_Setup_x64.exe"
+:vbaudiocable
+wget.exe --no-check-certificate "https://download.vb-audio.com/Download_vbaudiocable/VBvbaudiocable_Driver_Pack43.zip" -O vbaudiocable.zip
+7za e vbaudiocable.zip -o"vbaudiocable" -aoa >nul
+"vbaudiocable\VBvbaudiocable_Setup_x64.exe"
 pause
-del cable.zip
-rd /S /Q cable
+del vbaudiocable.zip
+rd /S /Q vbaudiocable
 goto software
 :wingetui
 wget.exe --no-check-certificate "https://github.com/marticliment/WingetUI/releases/download/2.1.0/WingetUI.Installer.exe" -O wingetui.exe
