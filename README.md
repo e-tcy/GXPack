@@ -1,7 +1,7 @@
 <h1 align="center">GX_ Pack</h1>
 
 <p align="center">
-<img src="https://github.com/GalexGX/GXPack/assets/132670526/771a731f-cd63-4930-aa9c-93e613d8f136" alt="logo" width="25%"/>
+<img src="https://github.com/GalexGX/GXPack/blob/main/gx_%20dark.png" alt="logo" width="25%"/>
 </p>
 
 <h2 align="center">A simple command line tool to download and install our favored programs.<h2>
