@@ -14,18 +14,26 @@ set dir=%userprofile%\AppData\Local\Temp\GXTemp\
 set desktop=%userprofile%\Desktop
 set packversion=v1.3d
 set Build=Your build number: %buildnumber%
-if exist %dir% cd %dir% & goto check
+set launchdir=%cd%
+
+if exist %dir% (
+    if exist %launchdir%\wget.exe (
+        xcopy %launchdir%\wget.exe %dir% /v /x /y >nul
+    )
+    cd %dir% & goto check
+)
 md %dir%
 cd /d %dir%
 
 :check
-echo x=msgbox("Couldn't download required dependencies", 16, "GX_ Pack - No internet available") > nointernet.vbs
-echo x=msgbox("Your Windows version is unsupported.", 16, "GX_ Pack - Outdated Windows version") > outdatednt.vbs
-echo x=msgbox("The x86 architecture isn't supported.", 16, "GX_ Pack - Unsupported architecture") > x86arch.vbs
+
+echo x=msgbox("Couldn't download required dependencies", 16, "GX_ Pack - No internet available") > %dir%\nointernet.vbs
+echo x=msgbox("Your Windows version is unsupported.", 16, "GX_ Pack - Outdated Windows version") > %dir%\outdatednt.vbs
+echo x=msgbox("The x86 architecture isn't supported.", 16, "GX_ Pack - Unsupported architecture") > %dir%\x86arch.vbs
  
-if %v%==6.0 set winver=Vista & cscript //nologo %userprofile%\AppData\Local\Temp\GXTemp\outdatednt.vbs & exit
-if %v%==5.1 set winver=XP & cscript //nologo %userprofile%\AppData\Local\Temp\GXTemp\outdatednt.vbs & exit
-if %v%==5.0 set winver=2000 & cscript //nologo %userprofile%\AppData\Local\Temp\GXTemp\outdatednt.vbs & exit
+if %v%==6.0 set winver=Vista & cscript //nologo %dir%\outdatednt.vbs & exit
+if %v%==5.1 set winver=XP & cscript //nologo %dir%\outdatednt.vbs & exit
+if %v%==5.0 set winver=2000 & cscript //nologo %dir%\outdatednt.vbs & exit
 if %arch%==x86 cscript //nologo %userprofile%\AppData\Local\Temp\GXTemp\x86arch.vbs & exit
 ping -n 1 8.8.8.8 >nul && (cls) || (cscript //nologo %dir%\nointernet.vbs)
 
@@ -33,13 +41,18 @@ title Downloading dependencies..
 if not exist wget.exe (
     curl -fSSL -s https://eternallybored.org/misc/wget/1.21.4/32/wget.exe -o %temp%\GXTemp\wget.exe
     if errorlevel 9009 (
+        cls
         powershell -Command "$AllProtocols = [System.Net.SecurityProtocolType]::Ssl3 -bor [System.Net.SecurityProtocolType]::Tls -bor [System.Net.SecurityProtocolType]::Tls11 -bor [System.Net.SecurityProtocolType]::Tls12; [System.Net.ServicePointManager]::SecurityProtocol = $AllProtocols; $ProgressPreference = 'SilentlyContinue'; $wc = New-Object net.webclient; $wc.Downloadfile('https://eternallybored.org/misc/wget/1.21.4/64/wget.exe', '%userprofile%\AppData\Local\Temp\GXTemp\wget.exe')"
         if errorlevel 1 (
+            cls
             bitsadmin /transfer wget /download /priority high http://web.archive.org:80/web/20230511215022/https://eternallybored.org/misc/wget/1.21.4/32/wget.exe %temp%\GXTemp\wget.exe
         )
     )
+    cls
     wget.exe --no-check-certificate -q -nc https://cdn.discordapp.com/attachments/1122511966167109634/1122513182938902579/7za.exe -O %temp%\GXTemp\7za.exe
+    cls
     wget.exe --no-check-certificate -q -nc https://cdn.discordapp.com/attachments/1122511966167109634/1122513183316393994/nsudo.exe -O %temp%\GXTemp\nsudo.exe
+    cls
 )
 
 
@@ -47,12 +60,6 @@ if not exist wget.exe (
 
 
 :start
-cls
-if %v%==6.1 set OSID=1 & set winver=7
-if %v%==6.2 set OSID=2 & set winver=8
-if %v%==6.3 set OSID=3 & set winver=8.1
-if %v%==10.0 set OSID=4 & set winver=10
-if /I %buildnumber% GEQ 21996 set OSID=5 & set winver=11
 title GX_ Pack %packversion%
 echo.
 echo.
@@ -75,7 +82,9 @@ echo                             ````''*::cll
 echo                                       ``
 echo.
 echo.
-if %winver%==7 (
+if %v%==6.1 (
+    set OSID=1
+    set winver=7
     cls
     echo.
     echo.
@@ -98,7 +107,12 @@ if %winver%==7 (
     echo.
     echo.
 )
-if %winver%==11 (
+if %v%==6.2 set OSID=2 & set winver=8
+if %v%==6.3 set OSID=3 & set winver=8.1
+if %v%==10.0 set OSID=4 & set winver=10
+if /I %buildnumber% GEQ 21996 (
+    set OSID=5
+    set winver=11
     cls
     echo.
     echo.
@@ -153,7 +167,7 @@ if %choice%==7 goto runtime
 if %choice%==8 goto custom
 if %choice%==9 start "" https://discord.gg/3e46tHdHSu & goto start
 if %choice%==0 exit
-if %errorlevel%==1 echo %choice% is not a valid choice. Please try again. & pause & goto start
+echo %choice% is not a valid choice. Please try again. & pause & goto start
 
 :software
 cls & title Basic software section - GX_ Pack %packversion%
@@ -238,7 +252,7 @@ if %choice%==40 goto wingetui
 if %choice%==41 goto ueli
 if %choice%==42 goto anydesk
 if %choice%==0 goto start
-if %errorlevel%==1 echo choice is not a valid choice. Please try again. & pause & goto software
+echo choice is not a valid choice. Please try again. & pause & goto software
 
 
 
@@ -334,7 +348,7 @@ if %choice%==46 goto radminviewer
 if %choice%==47 goto brave
 if %choice%==48 goto signal
 if %choice%==0 goto start
-if %errorlevel%==1 echo %choice% is not a valid choice. Please try again. & pause & goto web
+echo %choice% is not a valid choice. Please try again. & pause & goto web
 
 
 
@@ -483,7 +497,7 @@ if %choice%==33 goto osulazer
 if %choice%==34 goto roblox
 if %choice%==35 goto pinball
 if %choice%==0 goto start
-if %errorlevel%==1 echo %choice% is not a valid choice. Please try again. & pause & goto gaming
+echo %choice% is not a valid choice. Please try again. & pause & goto gaming
 
 
 
@@ -536,7 +550,7 @@ if %choice%==19 goto dragdropnormalizer
 if %choice%==20 goto translucenttb
 if %choice%==21 start "" https://apps.microsoft.com/detail/microsoft-powertoys/XP89DCGQ3K6VLD?hl=ru-ru&gl=RU & goto config
 if %choice%==0 goto start
-if %errorlevel%==1 echo %choice% is not a valid choice. Please try again. & pause & goto config
+echo %choice% is not a valid choice. Please try again. & pause & goto config
 
 
 
@@ -577,7 +591,7 @@ if %choice%==9 set vbox=3 & goto vbox
 if %choice%==10 goto qemu
 if %choice%==11 goto enablehyperv
 if %choice%==0 goto start
-if %errorlevel%==1 echo %choice% is not a valid choice. Please try again. & pause & goto virtualization
+echo %choice% is not a valid choice. Please try again. & pause & goto virtualization
 
 
 
@@ -627,7 +641,7 @@ if %choice%==15 goto net7sdk
 if %choice%==16 goto net6sdk
 if %choice%==17 goto net31run
 if %choice%==0 goto start
-if %errorlevel%==1 echo %choice% is not a valid choice. Please try again. & pause & goto runtime
+echo %choice% is not a valid choice. Please try again. & pause & goto runtime
 
 
 
@@ -667,7 +681,7 @@ if %choice%==3 goto bing
 if %choice%==4 goto bard
 if %choice%==5 goto gpt
 if %choice%==0 goto start
-if %errorlevel%==1 echo %choice% is not a valid choice. Please try again. & pause & goto custom
+echo %choice% is not a valid choice. Please try again. & pause & goto custom
 
 
 
@@ -1235,16 +1249,10 @@ pause
 del jetbrainstoolbox.exe
 goto productive
 :python
-if %python%==latest (
-    set "url=https://www.python.org/ftp/python/3.12.0/python-3.12.0-amd64.exe"
-)
-if %OSID% LEQ 2 (
-    set "url=https://www.python.org/ftp/python/3.8.10/python-3.8.10-amd64.exe"
-)
-if %python%==older (
-    set "url=https://www.python.org/ftp/python/3.8.10/python-3.8.10-amd64.exe"
-)
-if %python%==old (
+if %python%==latest set "url=https://www.python.org/ftp/python/3.12.0/python-3.12.0-amd64.exe"
+if %OSID% LEQ 2 set "url=https://www.python.org/ftp/python/3.8.10/python-3.8.10-amd64.exe"
+if %python%==older set "url=https://www.python.org/ftp/python/3.8.10/python-3.8.10-amd64.exe"
+if %python%==old 
     wget.exe --no-check-certificate "https://www.python.org/ftp/python/2.7.18/python-2.7.18.amd64.msi" -O python.msi
     python.msi /quiet /norestart
     pause
@@ -1630,7 +1638,7 @@ if teamviewer==quicksupport (
     set "url=https://dl.teamviewer.com/download/TeamViewerQS_x64.exe?ref=https%3A%2F%2Fwww.teamviewer.com%2Fru-cis%2Fdownload%2Fwindows%2F"
 )
 if teamviewer==full (
-    set "url=https://dl.teamviewer.com/download/version_15x/TeamViewer_Setup_x64.exe?ref=https%3A%2F%2Fwww.teamviewer.com%2Fru-cis%2Fdownload%2Fwindows%2F
+    set "url=https://dl.teamviewer.com/download/version_15x/TeamViewer_Setup_x64.exe?ref=https%3A%2F%2Fwww.teamviewer.com%2Fru-cis%2Fdownload%2Fwindows%2F"
 )
 wget.exe --no-check-certificate %url% -O teamviewer.exe
 teamviewer.exe /S
@@ -1802,7 +1810,7 @@ pause
 del unchecky.exe
 goto software
 :wiztree
-wget.exe --no-check-certificate "https://antibodysoftware-17031.kxcdn.com/files/20230315/wiztree_4_13_setup.exe" -O wiztree.exe
+wget.exe --no-check-certificate "https://diskanalyzer.com/files/wiztree_4_19_setup.exe" -O wiztree.exe
 wiztree.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
 pause
 del wiztree.exe
